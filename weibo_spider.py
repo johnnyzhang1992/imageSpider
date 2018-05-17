@@ -71,7 +71,9 @@ def get_cur_page_weibo(_json,i):
     # print(cur_page, page_total)
     # 打印微博
     for card in _cards:
+        # 微博
         if card['card_type'] == 9:
+            # 只爬取原创微博的配图
             if card['mblog']['weibo_position'] == 1:
                 if card['mblog']['pics']:
                     for x in range(len(card['mblog']['pics'])):
@@ -102,6 +104,7 @@ for i in range(1, page_total):
     print(response.url)
     html = response.text
     _json = json.loads(html)
+    # 爬十页休眠5秒
     if i%10 == 0:
         time.sleep(5)
     get_cur_page_weibo(_json,i)
