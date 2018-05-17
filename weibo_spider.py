@@ -25,7 +25,8 @@ cookie_save_file = "cookie.txt"#存cookie的文件名
 cookie_update_time_file = "cookie_timestamp.txt"#存cookie时间戳的文件名
 image_result_file = "image_result.md"#存图片结果的文件名
 
-user_id = '1900698023'
+# user_id = '1900698023'
+user_id = input('请输入所要爬取的用户id:')
 weibo_type = 'WEIBO_SECOND_PROFILE_WEIBO_PIC'
 containerid = '230413'+user_id
 lfid = '230283'+user_id
@@ -49,8 +50,6 @@ headers = {
 	'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1',
 	'X-Requested-With':'XMLHttpRequest'
  }
-cur_page = 1
-n = 1
 
 
 def save_image(img_src,id,pid,i):
@@ -65,11 +64,11 @@ def save_image(img_src,id,pid,i):
 
 def get_cur_page_weibo(_json,i):
     _cards = _json['data']['cards']
-    _cardListInfo = _json['data']['cardlistInfo']
+    # _cardListInfo = _json['data']['cardlistInfo']
 
-    page_total = _cardListInfo['total']  # 你要爬取的微博的页数
-    cur_page = _cardListInfo['page']  # 当前微博页数
-    print(cur_page, page_total)
+    # page_total = _cardListInfo['total']  # 你要爬取的微博的页数
+    # cur_page = _cardListInfo['page']  # 当前微博页数
+    # print(cur_page, page_total)
     # 打印微博
     for card in _cards:
         if card['card_type'] == 9:
@@ -89,6 +88,8 @@ def get_total_page(_url):
     __json = json.loads(_html)
     return  __json['data']['cardlistInfo']['total']  # 你要爬取的微博的页数
 
+
+# 总页数
 page_total = int(get_total_page(_url))
 # 遍历每一页
 for i in range(1, page_total):
@@ -101,5 +102,7 @@ for i in range(1, page_total):
     print(response.url)
     html = response.text
     _json = json.loads(html)
+    if i%10 == 0:
+        time.sleep(5)
     get_cur_page_weibo(_json,i)
 
