@@ -5,6 +5,7 @@
 from selenium import webdriver
 import time
 import requests
+import urllib.request
 import json
 from bs4 import BeautifulSoup
 import os
@@ -48,11 +49,21 @@ headers = {
 	'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1',
 	'X-Requested-With':'XMLHttpRequest'
  }
-
-page_total = 1
 cur_page = 1
+n = 1
 
-def get_cur_page_weibo(_json):
+
+def save_image(img_src,id,pid,i):
+    print(img_src)
+    print('\n')
+    if not os.path.exists(str(user_id)):
+        os.makedirs(str(user_id))
+    _name = str(user_id) + '/' +str(id)+'_'+str(i)+'_' +str(pid) + '.jpg'
+    print(_name)
+    urllib.request.urlretrieve(img_src, _name)
+
+
+def get_cur_page_weibo(_json,i):
     _cards = _json['data']['cards']
     _cardListInfo = _json['data']['cardlistInfo']
 
@@ -63,19 +74,32 @@ def get_cur_page_weibo(_json):
     for card in _cards:
         if card['card_type'] == 9:
             if card['mblog']['weibo_position'] == 1:
-                print(card['mblog'])
-                print('\n')
+                if card['mblog']['pics']:
+                    for x in range(len(card['mblog']['pics'])):
+                        # print(card['mblog']['pics'][x]['large']['url'])
+                        print(card['mblog']['created_at'])
+                        save_image(card['mblog']['pics'][x]['large']['url'],card['mblog']['created_at'],x,card['mblog']['mid'])
+                        # print(card['mblog'])
 
+
+def get_total_page(_url):
+    _response = requests.get(_url, headers=headers)
+    print(_response.url)
+    _html = _response.text
+    __json = json.loads(_html)
+    return  __json['data']['cardlistInfo']['total']  # 你要爬取的微博的页数
+
+page_total = int(get_total_page(_url))
 # 遍历每一页
-for i in range(page_total):
+for i in range(1, page_total):
     headers['Cookie'] = cookie
-    if cur_page >1:
-        _url = _url+'&page_type=03&page='+cur_page
-    response = requests.get(_url, headers=headers, params=profile_request_params)
+    # print(_url)
+    if i > 1:
+        _url = _url+'&page_type=03&page='+str(i)
+        print(_url)
+    response = requests.get(_url, headers=headers)
     print(response.url)
     html = response.text
     _json = json.loads(html)
-    get_cur_page_weibo(_json)
-
-
+    get_cur_page_weibo(_json,i)
 
