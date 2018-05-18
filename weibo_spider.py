@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 import os
 import sys
 
+
 request_params = {"ajwvr":"6","domain":"100505","domain_op":"100505","feed_type":"0","is_all":"1","is_tag":"0","is_search":"0"}
 profile_request_params = {"profile_ftype":"1","is_all":"1"}
 
