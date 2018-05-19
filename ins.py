@@ -4,6 +4,7 @@
 
 from selenium import webdriver
 import time
+import math
 import requests
 import urllib.request
 import json
@@ -53,6 +54,7 @@ next_cursor = _list.attrs['next-cursor']
 rg = _list.attrs['data-rg']
 print('cursor: '+next_cursor)
 print('rg: '+rg)
+total = 0
 
 # 数据获取方式
 # 第一步，获取 p 元素的 code
@@ -63,9 +65,9 @@ def get_first_page_data(_soup):
 	items = _soup.find_all('div',class_='img-wrap')
 	if int(len(items)) > 0:
 		print('items-length:'+str(len(items)))
-		for i in range(1,int(len(items))):
+		for i in range(0,int(len(items))):
 			print(items[i].attrs['data-code'])
-			get_p_info(items[i].attrs['data-code'])
+			# get_p_info(items[i].attrs['data-code'])
 
 
 # 获取下一页内容
@@ -78,14 +80,57 @@ def get_more_data(_next_cursor, _rg, _has_next_page, __uid):
 		headers['Accept'] = '*/*'
 		headers['Content-Length'] = '0'
 		headers['Host'] =  'www.insstar.cn'
-		headers['Origin'] ='http://www.insstar.cn'
+		headers['Origin'] =ins_url
 		headers['X-Requested-With'] = 'XMLHttpRequest'
-		print(headers)
+		# print(headers)
 		response = requests.post(__url, headers=headers)
 		_json = json.loads(response.text)
 		# print(_json)
+		global next_cursor
+		global has_next_page
+		next_cursor= _json['user']['media']['page_info']['end_cursor']
+		has_next_page= _json['user']['media']['page_info']['has_next_page']
+		print(next_cursor,has_next_page)
+		if len(_json['user']['media']['nodes'])>0:
+			for i in range(0,int(len(_json['user']['media']['nodes']))):
+				# code
+				print(_json['user']['media']['nodes'][i]['code'])
+				# 获取当前页面的所有单条内容的详细信息
+				# get_p_info(_json['user']['media']['nodes'][i]['code'])
 
-# 获取详细信息
+
+def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
+	print(_next_cursor, _rg, _has_next_page, __uid)
+	if _next_cursor != '' and _rg != '' and _has_next_page:
+		__url = ' http://www.insstar.cn/user/yoona__lim?next=' + _next_cursor + '&uid=' + __uid + '&rg=' + _rg
+		print(__url)
+		headers['Referer'] = ins_url + '/' + user_id
+		headers['Accept'] = '*/*'
+		headers['Content-Length'] = '0'
+		headers['Host'] = 'www.insstar.cn'
+		headers['Origin'] = ins_url
+		headers['X-Requested-With'] = 'XMLHttpRequest'
+		# print(headers)
+		response = requests.post(__url, headers=headers)
+		_json = json.loads(response.text)
+		global total
+		global next_cursor
+		global has_next_page
+		total= _json['user']['media']['count']
+		next_cursor= _json['user']['media']['page_info']['end_cursor']
+		has_next_page= _json['user']['media']['page_info']['has_next_page']
+		print('total:'+str(total))
+		print('total_page:'+str(math.ceil(total / 12)))
+		if len(_json['user']['media']['nodes'])>0:
+			for i in range(0,int(len(_json['user']['media']['nodes']))):
+				# code
+				print(_json['user']['media']['nodes'][i]['code'])
+				# 获取当前页面的所有单条内容的详细信息
+				# get_p_info(_json['user']['media']['nodes'][i]['code'])
+
+
+
+# 获取单条内容的详细信息
 def get_p_info(_code):
 	headers['Referer'] = ins_url + '/p/' + _code
 	headers['Accept'] = '*/*'
@@ -95,9 +140,18 @@ def get_p_info(_code):
 	headers['X-Requested-With'] = 'XMLHttpRequest'
 	__url = ins_url+'/p/'+_code
 	response = requests.post(__url, headers=headers)
+	# 详细信息，待处理入库
 	_json = json.loads(response.text)
 	print(_json)
 
+# 第一页内容
+# get_first_page_data(soup)
+get_second_page_data(next_cursor, rg, has_next_page, _uid)
 
-get_first_page_data(soup)
-# get_more_data(next_cursor, rg, has_next_page, _uid)
+for i in range(1, int(math.ceil(total / 12))):
+	print('current_page'+str(i+2))
+	time.sleep(1)
+	if has_next_page:
+		get_more_data(next_cursor, rg, has_next_page, _uid)
+
+
