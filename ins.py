@@ -43,17 +43,19 @@ headers = {
 # 是否有下一页
 has_next_page = True
 
+# 抓取首屏信息，获得用户的id以及下一页加载的next_cursor
 req = requests.get(_url, headers=headers)
 soup = BeautifulSoup(req.text, 'html.parser')
 
+# uid 用户id
 _uid = soup.find(id='username')
 _uid = _uid.attrs['data-uid']
-print('uid: '+_uid)
+
+# 加载下一页的凭证
 _list = soup.find(id='list')
 next_cursor = _list.attrs['next-cursor']
 rg = _list.attrs['data-rg']
-print('cursor: '+next_cursor)
-print('rg: '+rg)
+# 当前用户的 ins 总条数
 total = 0
 
 # 数据获取方式
@@ -76,6 +78,7 @@ def get_more_data(_next_cursor, _rg, _has_next_page, __uid):
 	if _next_cursor != '' and _rg != '' and _has_next_page:
 		__url = ' http://www.insstar.cn/user/yoona__lim?next='+_next_cursor+'&uid='+__uid+'&rg='+_rg
 		print(__url)
+		# 更新请求头
 		headers['Referer'] = ins_url+'/'+user_id
 		headers['Accept'] = '*/*'
 		headers['Content-Length'] = '0'
@@ -84,13 +87,16 @@ def get_more_data(_next_cursor, _rg, _has_next_page, __uid):
 		headers['X-Requested-With'] = 'XMLHttpRequest'
 		# print(headers)
 		response = requests.post(__url, headers=headers)
+		# 获得的 json 格式的 ins 内容，先解析
 		_json = json.loads(response.text)
 		# print(_json)
+		# 更新全局的下一页凭证以及是否存在下一页
 		global next_cursor
 		global has_next_page
 		next_cursor= _json['user']['media']['page_info']['end_cursor']
 		has_next_page= _json['user']['media']['page_info']['has_next_page']
 		print(next_cursor,has_next_page)
+		# 遍历 json ，通过里面的单条ins的变识码，获取其详细信息
 		if len(_json['user']['media']['nodes'])>0:
 			for i in range(0,int(len(_json['user']['media']['nodes']))):
 				# code
@@ -104,6 +110,7 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 	if _next_cursor != '' and _rg != '' and _has_next_page:
 		__url = ' http://www.insstar.cn/user/yoona__lim?next=' + _next_cursor + '&uid=' + __uid + '&rg=' + _rg
 		print(__url)
+		# 更新请求头
 		headers['Referer'] = ins_url + '/' + user_id
 		headers['Accept'] = '*/*'
 		headers['Content-Length'] = '0'
@@ -112,7 +119,9 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 		headers['X-Requested-With'] = 'XMLHttpRequest'
 		# print(headers)
 		response = requests.post(__url, headers=headers)
+		# 获得的 json 格式的 ins 内容，先解析
 		_json = json.loads(response.text)
+		# 更新全局的下一页凭证以及是否存在下一页
 		global total
 		global next_cursor
 		global has_next_page
@@ -121,6 +130,7 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 		has_next_page= _json['user']['media']['page_info']['has_next_page']
 		print('total:'+str(total))
 		print('total_page:'+str(math.ceil(total / 12)))
+		# 遍历 json ，通过里面的单条ins的变识码，获取其详细信息
 		if len(_json['user']['media']['nodes'])>0:
 			for i in range(0,int(len(_json['user']['media']['nodes']))):
 				# code
@@ -132,6 +142,7 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 
 # 获取单条内容的详细信息
 def get_p_info(_code):
+	# 更新请求头
 	headers['Referer'] = ins_url + '/p/' + _code
 	headers['Accept'] = '*/*'
 	headers['Content-Length'] = '0'
@@ -140,7 +151,7 @@ def get_p_info(_code):
 	headers['X-Requested-With'] = 'XMLHttpRequest'
 	__url = ins_url+'/p/'+_code
 	response = requests.post(__url, headers=headers)
-	# 详细信息，待处理入库
+	# 获得此条 ins 的详细信息，解析处理后待入库
 	_json = json.loads(response.text)
 	print(_json)
 
