@@ -2,11 +2,11 @@
 # encoding:utf-8
 # 这个例子是去获取ins里的图片，因为墙，所以爬的是一个国内的站
 
-from selenium import webdriver
+# from selenium import webdriver
 import time
 import math
 import requests
-import urllib.request
+# import urllib.request
 import json
 from bs4 import BeautifulSoup
 import os
@@ -18,8 +18,8 @@ profile_request_params = {"profile_ftype":"1","is_all":"1"}
 ins_url = "http://www.insstar.cn"
 
 # 林允儿
-user_id = 'yoona__lim'
-# user_id = input('请输入所要爬取的用户username:')
+# user_id = 'yoona__lim'
+user_id = input('请输入所要爬取的用户username:')
 
 _url = ins_url+'/'+str(user_id)
 
@@ -45,6 +45,18 @@ has_next_page = True
 
 # 抓取首屏信息，获得用户的id以及下一页加载的next_cursor
 req = requests.get(_url, headers=headers)
+print('status code: '+str(req.status_code))
+
+if req.status_code == 200:
+	print('页面抓取正常')
+elif req.status_code == 404:
+	print('当前用户不存在')
+	# 退出程序
+	sys.exit()
+else:
+	print('页面抓取异常')
+	print(req.headers)
+
 soup = BeautifulSoup(req.text, 'html.parser')
 
 # uid 用户id
@@ -70,13 +82,15 @@ def get_first_page_data(_soup):
 		for i in range(0,int(len(items))):
 			print(items[i].attrs['data-code'])
 			# get_p_info(items[i].attrs['data-code'])
+	else:
+		print('当前用户无公开内容')
 
 
 # 获取下一页内容
 def get_next_data(_next_cursor, _rg, _has_next_page, __uid):
 	print(_next_cursor,_rg,_has_next_page,__uid)
 	if _next_cursor != '' and _rg != '' and _has_next_page:
-		__url = ' http://www.insstar.cn/user/yoona__lim?next='+_next_cursor+'&uid='+__uid+'&rg='+_rg
+		__url = ins_url + '/user/' + user_id + '?next=' + _next_cursor + '&uid=' + __uid + '&rg=' + _rg
 		print(__url)
 		# 更新请求头
 		headers['Referer'] = ins_url+'/'+user_id
@@ -87,6 +101,16 @@ def get_next_data(_next_cursor, _rg, _has_next_page, __uid):
 		headers['X-Requested-With'] = 'XMLHttpRequest'
 		# print(headers)
 		response = requests.post(__url, headers=headers)
+		if response.status_code == 200:
+			print('页面抓取正常')
+		elif response.status_code == 404:
+			print('当前页面不存在')
+			# 退出程序
+			sys.exit()
+		else:
+			print('页面抓取异常')
+			print(response.headers)
+			sys.exit()
 		# 获得的 json 格式的 ins 内容，先解析
 		_json = json.loads(response.text)
 		# print(_json)
@@ -108,7 +132,7 @@ def get_next_data(_next_cursor, _rg, _has_next_page, __uid):
 def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 	print(_next_cursor, _rg, _has_next_page, __uid)
 	if _next_cursor != '' and _rg != '' and _has_next_page:
-		__url = ' http://www.insstar.cn/user/yoona__lim?next=' + _next_cursor + '&uid=' + __uid + '&rg=' + _rg
+		__url = ins_url+'/user/'+user_id+'?next=' + _next_cursor + '&uid=' + __uid + '&rg=' + _rg
 		print(__url)
 		# 更新请求头
 		headers['Referer'] = ins_url + '/' + user_id
@@ -119,6 +143,16 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 		headers['X-Requested-With'] = 'XMLHttpRequest'
 		# print(headers)
 		response = requests.post(__url, headers=headers)
+		if response.status_code == 200:
+			print('页面抓取正常')
+		elif response.status_code == 404:
+			print('当前页面不存在')
+			# 退出程序
+			sys.exit()
+		else:
+			print('页面抓取异常')
+			print(response.headers)
+			sys.exit()
 		# 获得的 json 格式的 ins 内容，先解析
 		_json = json.loads(response.text)
 		# 更新全局的下一页凭证以及是否存在下一页
@@ -148,10 +182,20 @@ def get_p_info(_code):
 	headers['Accept'] = '*/*'
 	headers['Content-Length'] = '0'
 	headers['Host'] = 'www.insstar.cn'
-	headers['Origin'] = 'http://www.insstar.cn'
+	headers['Origin'] = ins_url
 	headers['X-Requested-With'] = 'XMLHttpRequest'
 	__url = ins_url+'/p/'+_code
 	response = requests.post(__url, headers=headers)
+	if response.status_code == 200:
+		print('页面抓取正常')
+	elif response.status_code == 404:
+		print('当前页面不存在')
+		# 退出程序
+		sys.exit()
+	else:
+		print('页面抓取异常')
+		print(response.headers)
+		sys.exit()
 	# 获得此条 ins 的详细信息，解析处理后待入库
 	_json = json.loads(response.text)
 	print(_json)
