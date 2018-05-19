@@ -73,7 +73,7 @@ def get_first_page_data(_soup):
 
 
 # 获取下一页内容
-def get_more_data(_next_cursor, _rg, _has_next_page, __uid):
+def get_next_data(_next_cursor, _rg, _has_next_page, __uid):
 	print(_next_cursor,_rg,_has_next_page,__uid)
 	if _next_cursor != '' and _rg != '' and _has_next_page:
 		__url = ' http://www.insstar.cn/user/yoona__lim?next='+_next_cursor+'&uid='+__uid+'&rg='+_rg
@@ -104,7 +104,7 @@ def get_more_data(_next_cursor, _rg, _has_next_page, __uid):
 				# 获取当前页面的所有单条内容的详细信息
 				# get_p_info(_json['user']['media']['nodes'][i]['code'])
 
-
+# 获取第二页的内容
 def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 	print(_next_cursor, _rg, _has_next_page, __uid)
 	if _next_cursor != '' and _rg != '' and _has_next_page:
@@ -125,6 +125,7 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 		global total
 		global next_cursor
 		global has_next_page
+		# ins 总条数，用来计算总页数
 		total= _json['user']['media']['count']
 		next_cursor= _json['user']['media']['page_info']['end_cursor']
 		has_next_page= _json['user']['media']['page_info']['has_next_page']
@@ -157,12 +158,15 @@ def get_p_info(_code):
 
 # 第一页内容
 # get_first_page_data(soup)
+# 第二页内容
 get_second_page_data(next_cursor, rg, has_next_page, _uid)
 
+#从第三页以及剩余的内容
 for i in range(1, int(math.ceil(total / 12))):
-	print('current_page'+str(i+2))
+	print('current_page: '+str(i+2))
 	time.sleep(1)
 	if has_next_page:
-		get_more_data(next_cursor, rg, has_next_page, _uid)
+		# 获取下一页的 ins 内容
+		get_next_data(next_cursor, rg, has_next_page, _uid)
 
 
