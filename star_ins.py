@@ -19,8 +19,8 @@ profile_request_params = {"profile_ftype":"1","is_all":"1"}
 ins_url = "http://www.insstar.cn"
 
 # 林允儿
-user_id = 'yoona__lim'
-# user_id = input('请输入所要爬取的用户username:')
+# user_id = 'yoona__lim'
+user_id = input('请输入所要爬取的用户username:')
 
 # star_id:
 star_id = input('请输入star_id:')
