@@ -2,14 +2,15 @@
 # encoding:utf-8
 # 这个例子是去获取微博里的图片，例子爬取的微博是萌妹子吴倩：吴倩mine4ever
 
-from selenium import webdriver
+# from selenium import webdriver
 import time
 import requests
 import urllib.request
 import json
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 import os
 import sys
+import psycopg2
 
 
 request_params = {"ajwvr":"6","domain":"100505","domain_op":"100505","feed_type":"0","is_all":"1","is_tag":"0","is_search":"0"}
@@ -22,17 +23,24 @@ weibo_url = "https://m.weibo.cn/"
 # WEIBO_SECOND_PROFILE_WEIBO_ARTICAL 文章
 # WEIBO_SECOND_PROFILE_WEIBO_WEIBO_SECOND_PROFILE_WEIBO_PIC 文章
 
-cookie_save_file = "cookie.txt"#存cookie的文件名
-cookie_update_time_file = "cookie_timestamp.txt"#存cookie时间戳的文件名
-image_result_file = "image_result.md"#存图片结果的文件名
-
 # user_id = '1900698023'
+# star_id = 1
 user_id = input('请输入所要爬取的用户id:')
+star_id = input('请输入star_id:')
 weibo_type = 'WEIBO_SECOND_PROFILE_WEIBO_PIC'
 containerid = '230413'+user_id
 lfid = '230283'+user_id
 # username = 'your weibo accounts'##你的微博账号
 # password = 'your weibo password'##你的微博密码
+
+# 数据库
+db_name = 'starimg'
+db_user = 'postgres'
+db_password = input('请输入数据库密码：')
+
+# 时间
+created_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+updated_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 _url = 'https://m.weibo.cn/api/container/getIndex?containerid='+ containerid+'_-_'+weibo_type+'&luicode=10000011&lfid='+lfid
 
@@ -63,6 +71,36 @@ def save_image(img_src,id,pid,i):
     urllib.request.urlretrieve(img_src, _name)
 
 
+def insert_database(card,pic):
+    attitudes_count = card['attitudes_count']
+    comments_count = card['comments_count']
+    reposts_count = card['reposts_count']
+    is_long_text = card['isLongText']
+    text = card['text']
+    mid = card['mid']
+    code = card['bid']
+    display_url = pic['large']['url']
+    pic_detail = pic
+    take_at_timestamp = card['created_at']
+    status = 'active'
+    origin_url = 'https://weibo.com/'+user_id+'/'+code
+    print(star_id,'微博',attitudes_count,comments_count,reposts_count,is_long_text,text,mid,code,display_url)
+    print(pic_detail)
+    print(take_at_timestamp,status)
+    conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+                            port="5432")
+    if conn1:
+        cur1 = conn1.cursor()
+        cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,comments_count,reposts_count,\
+                                                            is_long_text,text,mid,code,display_url,pic_detail,take_at_timestamp,status,created_at,updated_at,origin_url) \
+                                                                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                     (star_id, '微博',attitudes_count,comments_count,reposts_count,is_long_text,text[0:255],mid,code,display_url,json.dumps(pic_detail),take_at_timestamp,status,created_at, updated_at,origin_url))
+        conn1.commit()
+    else:
+        conn1.close()
+
+
+
 def get_cur_page_weibo(_json,i):
     _cards = _json['data']['cards']
     # _cardListInfo = _json['data']['cardlistInfo']
@@ -75,18 +113,18 @@ def get_cur_page_weibo(_json,i):
         # 微博
         if card['card_type'] == 9:
             # 只爬取原创微博的配图
-            if card['mblog']['weibo_position'] == 1:
+            if 'weibo_position' in card['mblog'].keys() and card['mblog']['weibo_position'] == 1:
                 if card['mblog']['pics']:
                     for x in range(len(card['mblog']['pics'])):
-                        # print(card['mblog']['pics'][x]['large']['url'])
-                        print(card['mblog']['created_at'])
-                        save_image(card['mblog']['pics'][x]['large']['url'],card['mblog']['created_at'],x,card['mblog']['mid'])
+                        # print(card['mblog']['created_at'])
+                        insert_database(card['mblog'],card['mblog']['pics'][x])
+                        # save_image(card['mblog']['pics'][x]['large']['url'],card['mblog']['created_at'],x,card['mblog']['mid'])
                         # print(card['mblog'])
 
 
 def get_total_page(_url):
     _response = requests.get(_url, headers=headers)
-    print(_response.url)
+    # print(_response.url)
     _html = _response.text
     __json = json.loads(_html)
     return  __json['data']['cardlistInfo']['total']  # 你要爬取的微博的页数
@@ -100,13 +138,19 @@ for i in range(1, page_total):
     # print(_url)
     if i > 1:
         _url = _url+'&page_type=03&page='+str(i)
-        print(_url)
+        # print(_url)
     response = requests.get(_url, headers=headers)
     print(response.url)
     html = response.text
     _json = json.loads(html)
-    # 爬十页休眠5秒
-    if i%10 == 0:
-        time.sleep(5)
-    get_cur_page_weibo(_json,i)
+    if 'cards' in _json['data']:
+        # 爬十页休眠5秒
+        if i % 10 == 0:
+            time.sleep(5)
+        time.sleep(1)
+        get_cur_page_weibo(_json, i)
+    else:
+        print('爬取完毕')
+        break
+
 
