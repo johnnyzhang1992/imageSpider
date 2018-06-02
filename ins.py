@@ -76,12 +76,16 @@ total = 0
 
 # 用户第一页内容
 def get_first_page_data(_soup):
-	items = _soup.find_all('div',class_='img-wrap')
+	items = _soup.find_all('div',class_='item')
 	if int(len(items)) > 0:
 		print('items-length:'+str(len(items)))
 		for i in range(0,int(len(items))):
-			print(items[i].attrs['data-code'])
-			# get_p_info(items[i].attrs['data-code'])
+			_item =items[i].find('div',attrs={'class':'img-wrap'})
+			print(_item.attrs['data-code'])
+			_like = items[i].find('div',attrs={'class':'likes'})
+			_like = _like.find('span',attrs={'class':'h6'})
+			_like = _like.get_text()
+			get_p_info(_item.attrs['data-code'],_like)
 	else:
 		print('当前用户无公开内容')
 
@@ -126,7 +130,7 @@ def get_next_data(_next_cursor, _rg, _has_next_page, __uid):
 				# code
 				print(_json['user']['media']['nodes'][i]['code'])
 				# 获取当前页面的所有单条内容的详细信息
-				# get_p_info(_json['user']['media']['nodes'][i]['code'])
+				get_p_info(_json['user']['media']['nodes'][i]['code'],_json['user']['media']['nodes'][i]['likes'])
 
 # 获取第二页的内容
 def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
@@ -171,12 +175,12 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 				# code
 				print(_json['user']['media']['nodes'][i]['code'])
 				# 获取当前页面的所有单条内容的详细信息
-				# get_p_info(_json['user']['media']['nodes'][i]['code'])
+				get_p_info(_json['user']['media']['nodes'][i]['code'],_json['user']['media']['nodes'][i]['likes'])
 
 
 
 # 获取单条内容的详细信息
-def get_p_info(_code):
+def get_p_info(_code,_like):
 	# 更新请求头
 	headers['Referer'] = ins_url + '/p/' + _code
 	headers['Accept'] = '*/*'
@@ -198,15 +202,29 @@ def get_p_info(_code):
 		sys.exit()
 	# 获得此条 ins 的详细信息，解析处理后待入库
 	_json = json.loads(response.text)
-	print(_json)
+	display_url = _json['display_url']
+	take_at_timestamp = _json['taken_at_timestamp']
+	attitudes_count = _like
+	pic_detail = _json['display_resources']
+	is_video = _json['is_video']
+	video_url = _json['video_url']
+	status = 'active'
+	print('Instagram',display_url,take_at_timestamp,attitudes_count,is_video,video_url)
+	print(pic_detail)
+	if _json['sidecar'] and len(_json['sidecar'])>0:
+		for i in range(2,len(_json['sidecar'])):
+			pic_detail = None
+			display_url = _json['sidecar'][i]['display_url']
+			print(pic_detail,display_url)
+
 
 # 第一页内容
-# get_first_page_data(soup)
+get_first_page_data(soup)
 # 第二页内容
 get_second_page_data(next_cursor, rg, has_next_page, _uid)
 
 #从第三页以及剩余的内容
-for i in range(1, int(math.ceil(total / 12))):
+for i in range(1, int(math.ceil(total / 12)+1)):
 	print('current_page: '+str(i+2))
 	time.sleep(1)
 	if has_next_page:

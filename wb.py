@@ -82,6 +82,7 @@ def insert_database(card,pic):
     display_url = pic['large']['url']
     pic_detail = pic
     take_at_timestamp = card['created_at']
+    source = card['source']
     status = 'active'
     origin_url = 'https://weibo.com/'+user_id+'/'+code
     print(star_id,'微博',attitudes_count,comments_count,reposts_count,is_long_text,text,mid,code,display_url)
@@ -92,9 +93,9 @@ def insert_database(card,pic):
     if conn1:
         cur1 = conn1.cursor()
         cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,comments_count,reposts_count,\
-                                                            is_long_text,text,mid,code,display_url,pic_detail,take_at_timestamp,status,created_at,updated_at,origin_url) \
-                                                                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                     (star_id, '微博',attitudes_count,comments_count,reposts_count,is_long_text,text[0:255],mid,code,display_url,json.dumps(pic_detail),take_at_timestamp,status,created_at, updated_at,origin_url))
+                                                            is_long_text,text,mid,code,display_url,pic_detail,take_at_timestamp,status,created_at,updated_at,origin_url,source) \
+                                                                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                     (star_id, '微博',attitudes_count,comments_count,reposts_count,is_long_text,text[0:255],mid,code,display_url,json.dumps(pic_detail),take_at_timestamp,status,created_at, updated_at,origin_url,source))
         conn1.commit()
     else:
         conn1.close()
@@ -135,15 +136,15 @@ page_total = int(get_total_page(_url))
 # 遍历每一页
 for i in range(1, page_total):
     headers['Cookie'] = cookie
-    # print(_url)
+    __url = _url
     if i > 1:
-        _url = _url+'&page_type=03&page='+str(i)
+        __url = _url+'&page_type=03&page='+str(i)
         # print(_url)
-    response = requests.get(_url, headers=headers)
+    response = requests.get(__url, headers=headers)
     print(response.url)
     html = response.text
     _json = json.loads(html)
-    if 'cards' in _json['data']:
+    if 'cards' in _json['data'] and len(_json['data']['cards'])>0:
         # 爬十页休眠5秒
         if i % 10 == 0:
             time.sleep(5)
