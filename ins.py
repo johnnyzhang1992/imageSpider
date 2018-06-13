@@ -251,10 +251,10 @@ def get_p_info(_code,_like):
 								 port="5432")
 	if conn1:
 		cur1 = conn1.cursor()
-		cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,status,created_at,updated_at,origin_url) \
-		                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+		cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,status,created_at,updated_at,origin_url) \
+		                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
 						 (star_id, 'instagram', attitudes_count, text[0:255],
-						  _code, display_url, json.dumps(pic_detail), take_at_timestamp, status, created_at, updated_at,
+						  _code, display_url, json.dumps(pic_detail), take_at_timestamp,is_video, status, created_at, updated_at,
 						  origin_url))
 		conn1.commit()
 	else:
