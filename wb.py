@@ -71,6 +71,20 @@ def save_image(img_src,id,pid,i):
     print(_name)
     urllib.request.urlretrieve(img_src, _name)
 
+# 判断是否已入库
+def is_in(code,mid):
+    conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+									 port="5432")
+    if conn:
+        cur = conn.cursor()
+        cur.execute("SELECT star_id, code ,mid from star_img WHERE code = '" + code + "' AND star_id = '"+ star_id+"' AND mid = '"+mid+"'")
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            print(rows[0][0], rows[0][1])
+            conn.commit()
+            conn.close()
+            sys.exit()
+
 
 def insert_database(card,pic):
     attitudes_count = card['attitudes_count']
@@ -80,6 +94,8 @@ def insert_database(card,pic):
     text = card['text']
     mid = card['mid']
     code = card['bid']
+    # 判断是否已入库
+    is_in(code,mid)
     display_url = pic['large']['url']
     pic_detail = pic
     take_at_timestamp = card['created_at']

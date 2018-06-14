@@ -197,13 +197,29 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 				# 获取当前页面的所有单条内容的详细信息
 				get_p_info(_json['user']['media']['nodes'][i]['code'],_json['user']['media']['nodes'][i]['likes'])
 
+# 判断是否已入库
+def is_in(code):
+	conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+									 port="5432")
+	if conn:
+		cur = conn.cursor()
 
+		cur.execute("SELECT star_id, code from star_img WHERE code = '" + code + "' AND star_id = '"+ star_id+"'")
+
+		rows = cur.fetchall()
+		if len(rows) > 0:
+			print(rows[0][0], rows[0][1])
+			conn.commit()
+			conn.close()
+			sys.exit()
 
 # 获取单条内容的详细信息
 def get_p_info(_code,_like):
 	# if current_page<16:
 	# 	print('current_page'+str(current_page))
 	# 	return  False
+	# 判断是否已经入库
+	is_in(_code)
 	# 更新请求头
 	_ua = UserAgent()
 	headers['Referer'] = ins_url + '/p/' + _code
@@ -247,14 +263,27 @@ def get_p_info(_code,_like):
 			pic_detail = None
 			display_url = _json['sidecar'][i]['display_url']
 			print(pic_detail,display_url)
+			conn2 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+									 port="5432")
+			if conn2:
+				cur1 = conn2.cursor()
+				cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,video_url,status,created_at,updated_at,origin_url) \
+				                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+							 (star_id, 'instagram', attitudes_count, text[0:255],
+							  _code, display_url, json.dumps(pic_detail), take_at_timestamp, is_video, video_url,
+							  status, created_at, updated_at,
+							  origin_url))
+				conn2.commit()
+			else:
+				conn2.close()
 	conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
 								 port="5432")
 	if conn1:
 		cur1 = conn1.cursor()
-		cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,status,created_at,updated_at,origin_url) \
-		                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+		cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,video_url,status,created_at,updated_at,origin_url) \
+		                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
 						 (star_id, 'instagram', attitudes_count, text[0:255],
-						  _code, display_url, json.dumps(pic_detail), take_at_timestamp,is_video, status, created_at, updated_at,
+						  _code, display_url, json.dumps(pic_detail), take_at_timestamp,is_video, video_url,status, created_at, updated_at,
 						  origin_url))
 		conn1.commit()
 	else:
