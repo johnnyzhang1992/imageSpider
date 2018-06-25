@@ -80,10 +80,12 @@ def is_in(code,mid):
         cur.execute("SELECT star_id, code ,mid from star_img WHERE code = '" + code + "' AND star_id = '"+ star_id+"' AND mid = '"+mid+"'")
         rows = cur.fetchall()
         if len(rows) > 0:
-            print(rows[0][0], rows[0][1])
+            print(rows[0][0], rows[0][1], rows[0][2])
+            print('--已爬取--')
             conn.commit()
             conn.close()
-            sys.exit()
+            # sys.exit()
+            return False
 
 
 def insert_database(card,pic):

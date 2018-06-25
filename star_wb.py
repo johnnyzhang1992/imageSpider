@@ -27,8 +27,8 @@ cookie_save_file = "cookie.txt"#存cookie的文件名
 cookie_update_time_file = "cookie_timestamp.txt"#存cookie时间戳的文件名
 image_result_file = "image_result.md"#存图片结果的文件名
 
-user_id = '1900698023'
-# user_id = input('请输入所要爬取的用户id:')
+# user_id = '1900698023'
+user_id = input('请输入所要爬取的用户id:')
 star_id = input('请输入star_id:')
 # star_id = int(star_id)
 weibo_type = 'WEIBO_SECOND_PROFILE_WEIBO_PIC'
@@ -75,7 +75,6 @@ def is_has_star():
         cur.execute("SELECT id, name from star WHERE id = '" + star_id + "'")
         rows = cur.fetchall()
         if len(rows) > 0:
-            print(']n')
             print('用户存在：',rows[0][0], rows[0][1])
             print('\n')
         else:
