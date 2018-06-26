@@ -36,9 +36,9 @@ containerid = '230413'+user_id
 lfid = '230283'+user_id
 
 
-_url = 'https://m.weibo.cn/api/container/getIndex?containerid='+ containerid+'_-_'+weibo_type+'&luicode=10000011&lfid='+lfid
+_url = 'https://m.weibo.cn/api/container/getIndex?containerid='+ containerid+'_-_'+weibo_type+'&luicode=10000011&lfid='+lfid+'&type=uid&value='+user_id
 
-cookie = '_T_WM=47ce00ce9baf7730b2dee7a7023362d4; SCF=AlD_D4IMYnW7WzQ9VEjiEVe50R9Fshf46k1BIJCyCzJFbuSNTxjfHAv7agK3y3i_9kRG0lCTLIb-91euITt8yQc.; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9Wh_3rJYUVcA77DsgIS-UzV_5JpX5K-hUgL.FozXS0Mp1he0eKe2dJLoIEXLxK-LBo5L12qLxK-LBo5L12qLxKqLBKzLBKqLxK-LBoMLBK-LxK-L1-eLB.2t; OUTFOX_SEARCH_USER_ID_NCOO=1522352563.9397414; SUHB=0FQ7BzCGxmtbxL; H5_INDEX_TITLE=%E5%A5%BD%E5%8F%8B%E5%9C%88%20; H5_INDEX=2; ___rl__test__cookies=1526289390542; SUB=_2AkMtpetVdcNxrABTmPgQymPlZIxH-jyecIKjAn7oJhMyPRh77g0AqSdutBF-XJf10Iac9sti1kbQHWAgNUxtA8MZ; MLOGIN=0; WEIBOCN_FROM=1110006030; M_WEIBOCN_PARAMS=luicode%3D10000011%26lfid%3D2302831900698023%26fid%3D2304131900698023_-_WEIBO_SECOND_PROFILE_WEIBO_PIC%26uicode%3D10000011'
+cookie = 'OUTFOX_SEARCH_USER_ID_NCOO=200622491.85643607; _T_WM=5fe554ab8cacafd1178a525cdecf9e27; ALF=1532570144; WEIBOCN_FROM=1110006030; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9Wh_3rJYUVcA77DsgIS-UzV_5JpX5K-hUgL.FozXS0Mp1he0eKe2dJLoIEXLxK-LBo5L12qLxK-LBo5L12qLxKqLBKzLBKqLxK-LBoMLBK-LxK-L1-eLB.2t; MLOGIN=1; SCF=AlD_D4IMYnW7WzQ9VEjiEVe50R9Fshf46k1BIJCyCzJFNXp5Ai-xhaJMvwpW7jxV361LEmg8knsQ7H0vcFYg1nI.; SUB=_2A252Nbk8DeRhGeRK7FUQ-C3Pyj-IHXVV2cd0rDV6PUJbktAKLWv_kW1NUyw6NHG_SIkq3ybyx2AupZO4pWVE13rr; SUHB=0BLpnRWl2XCpLH; SSOLoginState=1529989484; M_WEIBOCN_PARAMS=oid%3D2304131350995007_-_WEIBO_SECOND_PROFILE_MORE_WEIBO%26fid%3D2302831350995007%26luicode%3D10000011%26lfid%3D2302831350995007%26uicode%3D10000011'
 # User-Agent需要根据每个人的电脑来修改
 headers = {
     'Accept': 'application/json, text/plain, */*',
@@ -50,8 +50,7 @@ headers = {
 	'Host':'m.weibo.cn',
 	'Pragma':'no-cache',
 	'Referer':_url,
-	'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1',
-	'X-Requested-With':'XMLHttpRequest'
+	'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
  }
 
 # 数据库
@@ -63,6 +62,7 @@ star_info = ''
 # 明星信息
 def get_user_info(user):
     global  star_info
+    print('--get-user-info---')
     star_info = user
     # print(user)
     return  user
@@ -104,7 +104,7 @@ print(_response.url)
 _html = _response.text
 _json = json.loads(_html)
 _cards = _json['data']['cards']
-
+print(len(_cards))
 def save_sql():
     conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
                             port="5432")
@@ -123,7 +123,7 @@ def save_sql():
         # 存在，update
         if len(rows) > 0:
             print('\n')
-            print('用户存在：', rows[0][1])
+            print('----用户存在：', rows[0][1])
             print('更新数据中。。。\n')
             cur.execute("UPDATE star_wb \
                 set screen_name = '" + star_info['screen_name'] + "',verified = '"+ str(star_info['verified'])+"',\
@@ -160,10 +160,15 @@ for card in _cards:
     # 微博
     if card['card_type'] == 9:
         # 只爬取原创微博的配图
-        if card['mblog']['weibo_position'] == 1:
-            if card['mblog']:
+        if card['mblog']:
+               if card['mblog']['weibo_position'] == 1:
+                print('----user--')
                 get_user_info(card['mblog']['user'])
                 save_sql()
-    break
+                break
+        else:
+            continue
+    else:
+        continue
 
 
