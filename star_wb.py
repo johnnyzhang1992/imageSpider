@@ -28,13 +28,46 @@ cookie_update_time_file = "cookie_timestamp.txt"#存cookie时间戳的文件名
 image_result_file = "image_result.md"#存图片结果的文件名
 
 # user_id = '1900698023'
-user_id = input('请输入所要爬取的用户id:')
+# user_id = input('请输入所要爬取的用户id:')
 star_id = input('请输入star_id:')
 # star_id = int(star_id)
+
+# 数据库
+db_name = 'starimg'
+db_user = 'postgres'
+db_password = input('请输入数据库密码：')
+
+# 获取
+def get_wb_id(_star_id):
+    conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+                            port="5432")
+    if conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id,wb_id from star WHERE  id = '" + _star_id + "'")
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            print(rows[0][0], rows[0][1])
+            if rows[0][1]:
+                return rows[0][1]
+        else:
+            return False
+    else:
+        return False
+
+
+# 判断数据库是否存在wb_id
+user_id = get_wb_id(star_id)
+if  user_id:
+    print('---存在wb_id---继续进行')
+else:
+    # global user_id
+    user_id = input('请输入所要爬取的用户id:')
+
+# 拼接字段
 weibo_type = 'WEIBO_SECOND_PROFILE_WEIBO_PIC'
 containerid = '230413'+user_id
 lfid = '230283'+user_id
-
 
 _url = 'https://m.weibo.cn/api/container/getIndex?containerid='+ containerid+'_-_'+weibo_type+'&luicode=10000011&lfid='+lfid+'&type=uid&value='+user_id
 
@@ -53,10 +86,6 @@ headers = {
 	'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
  }
 
-# 数据库
-db_name = 'starimg'
-db_user = 'postgres'
-db_password = input('请输入数据库密码：')
 
 star_info = ''
 # 明星信息

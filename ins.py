@@ -18,16 +18,50 @@ ua = UserAgent()
 request_params = {"ajwvr":"6","domain":"100505","domain_op":"100505","feed_type":"0","is_all":"1","is_tag":"0","is_search":"0"}
 profile_request_params = {"profile_ftype":"1","is_all":"1"}
 
-ins_url = "http://www.insstar.cn"
+ins_url = "http://insstar.cn"
 
 # 林允儿
 # user_id = 'yoona__lim'
-user_id = input('请输入所要爬取的用户username:')
+# user_id = input('请输入所要爬取的用户username:')
 star_id = input('请输入star_id:')
+
+# 数据库
+db_name = 'starimg'
+db_user = 'postgres'
+db_password = input('请输入数据库密码：')
+
+# 获取
+def get_ins_name(_star_id):
+    conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+                            port="5432")
+    if conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id,ins_name from star WHERE  id = '" + _star_id + "'")
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            print(rows[0][0], rows[0][1])
+            if rows[0][1]:
+                return rows[0][1]
+        else:
+            return False
+    else:
+        return False
+
+
+# 判断数据库是否存在wb_id
+user_id = get_ins_name(star_id)
+if  user_id:
+    print('---存在wb_id---继续进行')
+else:
+    # global user_id
+    user_id = input('请输入所要爬取的用户user_name:')
+
+# 拼接
 _url = ins_url+'/'+str(user_id)
-
-cookie = 'OUTFOX_SEARCH_USER_ID_NCOO=1467016326.6141114; connect.sid=s%3AdFjfuNVHoWOhMetAMn3AC97MWIOrLbQz.Vusw%2FQByZvSxZzBmFfyl8BuG4jrD%2FfVxEeJBLFcjfyQ; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1527477805,1527839810,1528004944,1528078892; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1528081998'
-
+start_cookie_id = 1530156680
+_cookie = 'OUTFOX_SEARCH_USER_ID_NCOO=1467016326.6141114; connect.sid=s%3ASbXVOAHhAQkcuoXq5djh0kUUB3hyN6gf.5NfhuGxU6yL7gxVYqX1BEbUj4CuId6f5RFldewcXhuc; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1530003297,1530010145,1530087956,1530155670; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a='
+cookie = _cookie+str(start_cookie_id)
 # User-Agent需要根据每个人的电脑来修改
 headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -58,13 +92,8 @@ elif req.status_code == 404:
 	sys.exit()
 else:
 	print('页面抓取异常')
-	print(req)
+	print(req.text)
 	print(req.status_code)
-
-# 数据库
-db_name = 'starimg'
-db_user = 'postgres'
-db_password = input('请输入数据库密码：')
 
 # 时间
 created_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -94,6 +123,7 @@ current_page = 0
 
 # 用户第一页内容
 def get_first_page_data(_soup):
+	print('---第一页数据')
 	items = _soup.find_all('div',class_='item')
 	if int(len(items)) > 0:
 		print('items-length:'+str(len(items)))
@@ -103,7 +133,10 @@ def get_first_page_data(_soup):
 			_like = items[i].find('div',attrs={'class':'likes'})
 			_like = _like.find('span',attrs={'class':'h6'})
 			_like = _like.get_text()
-			get_p_info(_item.attrs['data-code'],_like)
+			if not is_in(_item.attrs['data-code']):
+				return False
+			else:
+				get_p_info(_item.attrs['data-code'],_like)
 	else:
 		print('当前用户无公开内容')
 
@@ -150,7 +183,9 @@ def get_next_data(_next_cursor, _rg, _has_next_page, __uid):
 				# code
 				print(_json['user']['media']['nodes'][i]['code'])
 				# 获取当前页面的所有单条内容的详细信息
-				get_p_info(_json['user']['media']['nodes'][i]['code'],_json['user']['media']['nodes'][i]['likes'])
+				if not get_p_info(_json['user']['media']['nodes'][i]['code'],_json['user']['media']['nodes'][i]['likes']):
+					continue
+
 
 # 获取第二页的内容
 def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
@@ -162,9 +197,14 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 		headers['Referer'] = ins_url + '/' + user_id
 		headers['Accept'] = '*/*'
 		headers['Content-Length'] = '0'
-		headers['Host'] = 'www.insstar.cn'
+		headers['Host'] = 'insstar.cn'
 		headers['Origin'] = ins_url
+		global start_cookie_id
+		_ua = UserAgent()
+		start_cookie_id = start_cookie_id+1
+		headers['Cookie'] = _cookie+str(start_cookie_id)
 		headers['X-Requested-With'] = 'XMLHttpRequest'
+		headers['User-Agent'] = _ua.random
 		# print(headers)
 		response = requests.post(__url, headers=headers)
 		if response.status_code == 200:
@@ -175,6 +215,7 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 			sys.exit()
 		else:
 			print('页面抓取异常')
+			print(response.text)
 			print(response.headers)
 			sys.exit()
 		# 获得的 json 格式的 ins 内容，先解析
@@ -195,7 +236,10 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 				# code
 				print(_json['user']['media']['nodes'][i]['code'])
 				# 获取当前页面的所有单条内容的详细信息
-				get_p_info(_json['user']['media']['nodes'][i]['code'],_json['user']['media']['nodes'][i]['likes'])
+				if not is_in(_json['user']['media']['nodes'][i]['code']):
+					return False
+				else:
+					get_p_info(_json['user']['media']['nodes'][i]['code'],_json['user']['media']['nodes'][i]['likes'])
 
 # 判断是否已入库
 def is_in(code):
@@ -211,7 +255,11 @@ def is_in(code):
 			print(rows[0][0], rows[0][1])
 			conn.commit()
 			conn.close()
-			sys.exit()
+			return False
+		else:
+			return True
+	else:
+		return True
 
 # 获取单条内容的详细信息
 def get_p_info(_code,_like):
@@ -219,75 +267,83 @@ def get_p_info(_code,_like):
 	# 	print('current_page'+str(current_page))
 	# 	return  False
 	# 判断是否已经入库
-	is_in(_code)
-	# 更新请求头
-	_ua = UserAgent()
-	headers['Referer'] = ins_url + '/p/' + _code
-	headers['Accept'] = '*/*'
-	headers['Content-Length'] = '0'
-	headers['Host'] = 'www.insstar.cn'
-	headers['Origin'] = ins_url
-	headers['X-Requested-With'] = 'XMLHttpRequest'
-	headers['User-Agent'] = _ua.random
-	__url = ins_url+'/p/'+_code
-	time.sleep(1)
-	response = requests.post(__url, headers=headers)
-	if response.status_code == 200:
-		print('页面抓取正常')
-	elif response.status_code == 404:
-		print('当前页面不存在')
-		# 退出程序
-		sys.exit()
+	if not is_in(_code):
+		return False
 	else:
-		print('页面抓取异常')
-		print(response.headers)
-		sys.exit()
-	# 获得此条 ins 的详细信息，解析处理后待入库
-	_json = json.loads(response.text)
-	display_url = _json['display_url']
-	take_at_timestamp = _json['taken_at_timestamp']
-	attitudes_count = _like
-	pic_detail = _json['display_resources']
-	is_video = _json['is_video']
-	video_url = _json['video_url']
-	status = 'active'
-	if 'caption' in _json.keys():
-		text = _json['caption']
-	else:
-		text = ''
-	origin_url = 'https://insstar.cn/p/'+_code
-	print('Instagram',display_url,take_at_timestamp,attitudes_count,is_video,video_url)
-	# print(pic_detail)
-	if _json['sidecar'] and len(_json['sidecar'])>0:
-		for i in range(2,len(_json['sidecar'])):
-			pic_detail = None
-			display_url = _json['sidecar'][i]['display_url']
-			print(pic_detail,display_url)
-			conn2 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
-									 port="5432")
-			if conn2:
-				cur1 = conn2.cursor()
-				cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,video_url,status,created_at,updated_at,origin_url) \
-				                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-							 (star_id, 'instagram', attitudes_count, text[0:255],
-							  _code, display_url, json.dumps(pic_detail), take_at_timestamp, is_video, video_url,
-							  status, created_at, updated_at,
-							  origin_url))
-				conn2.commit()
-			else:
-				conn2.close()
-	conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+		# 更新请求头
+		_ua = UserAgent()
+		headers['Referer'] = ins_url + '/p/' + _code
+		headers['Accept'] = '*/*'
+		headers['Content-Length'] = '0'
+		headers['Host'] = 'www.insstar.cn'
+		headers['Origin'] = ins_url
+		global start_cookie_id
+		start_cookie_id = start_cookie_id + 1
+		headers['Cookie'] = _cookie + str(start_cookie_id)
+		headers['X-Requested-With'] = 'XMLHttpRequest'
+		headers['User-Agent'] = _ua.random
+		__url = ins_url + '/p/' + _code
+		time.sleep(1)
+		response = requests.post(__url, headers=headers)
+		if response.status_code == 200:
+			print('页面抓取正常')
+		elif response.status_code == 404:
+			print('当前页面不存在')
+			# 退出程序
+			return False
+		else:
+			print('页面抓取异常')
+			print(response.headers)
+			return False
+		# 获得此条 ins 的详细信息，解析处理后待入库
+		_json = json.loads(response.text)
+		display_url = _json['display_url']
+		take_at_timestamp = _json['taken_at_timestamp']
+		attitudes_count = _like
+		pic_detail = _json['display_resources']
+		is_video = _json['is_video']
+		video_url = _json['video_url']
+		status = 'active'
+		if 'caption' in _json.keys():
+			text = _json['caption']
+		else:
+			text = ''
+		origin_url = 'http://insstar.cn/p/' + _code
+		print('Instagram', display_url, take_at_timestamp, attitudes_count, is_video, video_url)
+		# print(pic_detail)
+		if _json['sidecar'] and len(_json['sidecar']) > 0:
+			for i in range(2, len(_json['sidecar'])):
+				pic_detail = None
+				display_url = _json['sidecar'][i]['display_url']
+				print(pic_detail, display_url)
+				conn2 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+										 port="5432")
+				if conn2:
+					cur1 = conn2.cursor()
+					cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,video_url,status,created_at,updated_at,origin_url) \
+	    				                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+								 (star_id, 'instagram', attitudes_count, text[0:255],
+								  _code, display_url, json.dumps(pic_detail), take_at_timestamp, is_video, video_url,
+								  status, created_at, updated_at,
+								  origin_url))
+					conn2.commit()
+				else:
+					conn2.close()
+		conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
 								 port="5432")
-	if conn1:
-		cur1 = conn1.cursor()
-		cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,video_url,status,created_at,updated_at,origin_url) \
-		                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+		if conn1:
+			cur1 = conn1.cursor()
+			cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,video_url,status,created_at,updated_at,origin_url) \
+	    		                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
 						 (star_id, 'instagram', attitudes_count, text[0:255],
-						  _code, display_url, json.dumps(pic_detail), take_at_timestamp,is_video, video_url,status, created_at, updated_at,
+						  _code, display_url, json.dumps(pic_detail), take_at_timestamp, is_video, video_url, status,
+						  created_at, updated_at,
 						  origin_url))
-		conn1.commit()
-	else:
-		conn1.close()
+			conn1.commit()
+		else:
+			conn1.close()
+		return True
+
 
 # 第一页内容
 get_first_page_data(soup)
@@ -301,10 +357,10 @@ for i in range(1, int(math.ceil(total / 12)-1)):
 	# global current_page
 	# current_page = i+2
 	# print(i)
-	time.sleep(1)
-	if i % 7 == 0:
-		print('---休眠20秒--')
-		time.sleep(20)
+	time.sleep(3)
+	if i % 4 == 0:
+		print('---休眠10秒--')
+		time.sleep(10)
 	if has_next_page:
 		# 获取下一页的 ins 内容
 		get_next_data(next_cursor, rg, has_next_page, _uid)

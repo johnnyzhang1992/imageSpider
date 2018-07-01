@@ -20,10 +20,44 @@ ins_url = "http://www.insstar.cn"
 
 # 林允儿
 # user_id = 'yoona__lim'
-user_id = input('请输入所要爬取的用户username:')
+# user_id = input('请输入所要爬取的用户username:')
 
 # star_id:
 star_id = input('请输入star_id:')
+
+# 数据库
+db_name = 'starimg'
+db_user = 'postgres'
+db_password = input('请输入数据库密码：')
+
+# 获取
+def get_ins_name(_star_id):
+    conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+                            port="5432")
+    if conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id,ins_name from star WHERE  id = '" + _star_id + "'")
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            print(rows[0][0], rows[0][1])
+            if rows[0][1]:
+                return rows[0][1]
+        else:
+            return False
+    else:
+        return False
+
+
+# 判断数据库是否存在wb_id
+user_id = get_ins_name(star_id)
+if  user_id:
+    print('---存在wb_id---继续进行')
+else:
+    # global user_id
+    user_id = input('请输入所要爬取的用户user_name:')
+
+# 拼接
 _url = ins_url+'/'+str(user_id)
 #gender
 gender = input('性别(f/m):')
@@ -96,10 +130,7 @@ avatar = _avatar.attrs['src']
 created_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 updated_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
-# 数据库
-db_name = 'starimg'
-db_user = 'postgres'
-db_password = input('请输入数据库密码：')
+
 conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
                             port="5432")
 print('是否认证：'+ str(is_verified))

@@ -27,17 +27,48 @@ weibo_url = "https://m.weibo.cn/"
 # user_id = '1900698023'
 # star_id = 1
 star_id = input('请输入star_id:')
-user_id = input('请输入所要爬取的用户id:')
+
 weibo_type = 'WEIBO_SECOND_PROFILE_WEIBO_PIC'
-containerid = '230413'+user_id
-lfid = '230283'+user_id
-# username = 'your weibo accounts'##你的微博账号
-# password = 'your weibo password'##你的微博密码
 
 # 数据库
 db_name = 'starimg'
 db_user = 'postgres'
 db_password = input('请输入数据库密码：')
+
+# 获取
+def get_wb_id(_star_id):
+    conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+                            port="5432")
+    if conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id,wb_id from star WHERE  id = '" + _star_id + "'")
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            print(rows[0][0], rows[0][1])
+            if rows[0][1]:
+                return rows[0][1]
+        else:
+            return False
+    else:
+        return False
+
+
+# 判断数据库是否存在wb_id
+user_id = get_wb_id(star_id)
+if  user_id:
+    print('---存在wb_id---继续进行')
+else:
+    # global user_id
+    user_id = input('请输入所要爬取的用户id:')
+
+# 字段拼接
+containerid = '230413'+user_id
+lfid = '230283'+user_id
+# username = 'your weibo accounts'##你的微博账号
+# password = 'your weibo password'##你的微博密码
+
+
 
 # 时间
 created_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -151,7 +182,7 @@ def get_cur_page_weibo(_json,i):
 
 def get_total_page(_url):
     _response = requests.get(_url, headers=headers)
-    # print(_response.url)
+    print(_response.url)
     _html = _response.text
     __json = json.loads(_html)
     return  __json['data']['cardlistInfo']['total']  # 你要爬取的微博的页数
