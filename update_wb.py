@@ -44,10 +44,10 @@ def get_wb_id(_star_id):
     if conn:
         cur = conn.cursor()
         cur.execute(
-            "SELECT id,wb_id from star WHERE  id = '" + _star_id + "'")
+            "SELECT id,wb_id,name from star WHERE  id = '" + _star_id + "'")
         rows = cur.fetchall()
         if len(rows) > 0:
-            print(rows[0][0], rows[0][1])
+            print(rows[0][0], rows[0][1],rows[0][2])
             if rows[0][1]:
                 return rows[0][1]
         else:
@@ -75,7 +75,7 @@ def is_in(code,mid,_pid):
         rows = cur.fetchall()
         if len(rows) > 0:
             print(rows[0][0], rows[0][1], rows[0][2])
-            print('--已爬取--')
+            print('--暂无更新--')
             conn.commit()
             conn.close()
             # sys.exit()
@@ -146,7 +146,7 @@ def get_cur_page_weibo(_json,i,_wb_id):
 
 def get_total_page(_url,_headers):
     _response = requests.get(_url, headers=_headers)
-    print(_response.url)
+    # print(_response.url)
     _html = _response.text
     __json = json.loads(_html)
     return  __json['data']['cardlistInfo']['total']  # 你要爬取的微博的页数
@@ -193,7 +193,7 @@ def update_wb(_star_id):
             __url = _url + '&page_type=03&page=' + str(i)
             # print(_url)
         response = requests.get(__url, headers=headers)
-        print(response.url)
+        # print(response.url)
         html = response.text
         _json = json.loads(html)
         if 'cards' in _json['data'] and len(_json['data']['cards']) > 0:
@@ -215,16 +215,15 @@ conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, ho
 if conn:
     cur = conn.cursor()
     cur.execute(
-        "SELECT id, wb_id from star ORDER BY id ASC ")
+        "SELECT id, wb_id,name from star ORDER BY id ASC ")
     rows = cur.fetchall()
-    print(rows)
-    print(len(rows))
+    # print(rows)
+    # print(len(rows))
     conn.commit()
     conn.close()
     if len(rows) > 0:
         for n in range(len(rows)):
-            print('id---' + str(rows[n][0]))
-            print('wb_id---' + rows[n][1])
+            print(str(rows[n][0]),rows[n][1],rows[n][2])
             if not update_wb(str(rows[n][0])):
                 continue
             # sys.exit()
