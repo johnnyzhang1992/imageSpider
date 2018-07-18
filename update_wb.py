@@ -67,23 +67,25 @@ def save_image(img_src,id,pid,i):
 
 # 判断是否已入库
 def is_in(code,mid,_pid):
-    conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+    conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
 									 port="5432")
-    if conn:
-        cur = conn.cursor()
-        cur.execute("SELECT star_id, code ,mid ,pid from star_img WHERE pid = '"+_pid+"'AND code = '" + code + "' AND star_id = '"+ star_id+"' AND mid = '"+mid+"'")
-        rows = cur.fetchall()
-        if len(rows) > 0:
-            print(rows[0][0], rows[0][1], rows[0][2])
+    if conn1:
+        cur1 = conn1.cursor()
+        cur1.execute("SELECT star_id, code ,mid ,pid from star_img WHERE pid = '"+_pid+"'")
+        rows1 = cur1.fetchall()
+        if len(rows1) > 0:
+            print(rows1[0][0], rows1[0][1], rows1[0][2])
             print('--暂无更新--')
-            conn.commit()
-            conn.close()
+            conn1.commit()
+            conn1.close()
             # sys.exit()
-            return False
+            return True
         else:
-            return  True
+            conn1.commit()
+            conn1.close()
+            return  False
     else:
-        return True
+        return False
 
 
 def insert_database(card,pic,_user_id):
@@ -96,7 +98,7 @@ def insert_database(card,pic,_user_id):
     code = card['bid']
     # 判断是否已入库
     pid = pic['pid']
-    if is_in(code,mid,pid):
+    if not is_in(code,mid,pid):
         display_url = pic['large']['url']
         pic_detail = pic
         take_at_timestamp = card['created_at']
@@ -113,13 +115,14 @@ def insert_database(card,pic,_user_id):
             cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,comments_count,reposts_count,\
                                                                     is_long_text,text,mid,code,display_url,pic_detail,take_at_timestamp,status,created_at,updated_at,origin_url,source,pid) \
                                                                                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                         (star_id, '微博', attitudes_count, comments_count, reposts_count, is_long_text, text[0:255], mid,
+                         (star_id, '微博', attitudes_count, comments_count, reposts_count, is_long_text, text, mid,
                           code, display_url, json.dumps(pic_detail), take_at_timestamp, status, created_at, updated_at,
                           origin_url, source,pid))
             conn1.commit()
             conn1.close()
             return True
         else:
+            conn1.commit()
             conn1.close()
             return False
     else:
@@ -138,10 +141,8 @@ def get_cur_page_weibo(_json,i,_wb_id):
                 if 'pics' in card['mblog'].keys() and card['mblog']['pics']:
                     for x in range(len(card['mblog']['pics'])):
                         # print(card['mblog']['created_at'])
-                        if insert_database(card['mblog'],card['mblog']['pics'][x],_wb_id):
-                            return True
-                        else:
-                            return False
+                        if not insert_database(card['mblog'],card['mblog']['pics'][x],_wb_id):
+                            continue
 
 
 def get_total_page(_url,_headers):

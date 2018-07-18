@@ -108,7 +108,7 @@ def is_in(code,mid,_pid):
 									 port="5432")
     if conn:
         cur = conn.cursor()
-        cur.execute("SELECT star_id, code ,mid ,pid from star_img WHERE pid = '"+_pid+"'AND code = '" + code + "' AND star_id = '"+ star_id+"' AND mid = '"+mid+"'")
+        cur.execute("SELECT star_id,code ,mid ,pid from star_img WHERE pid = '"+_pid+"'")
         rows = cur.fetchall()
         if len(rows) > 0:
             print(rows[0][0], rows[0][1], rows[0][2])
@@ -118,6 +118,8 @@ def is_in(code,mid,_pid):
             # sys.exit()
             return False
         else:
+            conn.commit()
+            conn.close()
             return  True
     else:
         return True
@@ -150,10 +152,11 @@ def insert_database(card,pic):
             cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,comments_count,reposts_count,\
                                                                     is_long_text,text,mid,code,display_url,pic_detail,take_at_timestamp,status,created_at,updated_at,origin_url,source,pid) \
                                                                                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                         (star_id, '微博', attitudes_count, comments_count, reposts_count, is_long_text, text[0:255], mid,
+                         (star_id, '微博', attitudes_count, comments_count, reposts_count, is_long_text, text, mid,
                           code, display_url, json.dumps(pic_detail), take_at_timestamp, status, created_at, updated_at,
                           origin_url, source,pid))
             conn1.commit()
+            conn1.close()
         else:
             conn1.close()
 
