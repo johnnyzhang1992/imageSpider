@@ -18,7 +18,7 @@ ua = UserAgent()
 request_params = {"ajwvr":"6","domain":"100505","domain_op":"100505","feed_type":"0","is_all":"1","is_tag":"0","is_search":"0"}
 profile_request_params = {"profile_ftype":"1","is_all":"1"}
 
-ins_url = "http://insstar.cn"
+ins_url = "http://www.veryins.com"
 
 # 林允儿
 # user_id = 'yoona__lim'
@@ -55,33 +55,35 @@ if  user_id:
     print('---存在wb_id---继续进行')
 else:
     # global user_id
-    user_id = input('请输入所要爬取的用户user_name:')
+    user_id = input('请输入所要爬取的用户id:')
 
 # 拼接
 _url = ins_url+'/'+str(user_id)
-start_cookie_id = 1530156680
-_cookie = 'OUTFOX_SEARCH_USER_ID_NCOO=1467016326.6141114; connect.sid=s%3ASbXVOAHhAQkcuoXq5djh0kUUB3hyN6gf.5NfhuGxU6yL7gxVYqX1BEbUj4CuId6f5RFldewcXhuc; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1530003297,1530010145,1530087956,1530155670; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a='
-cookie = _cookie+str(start_cookie_id)
+start_cookie_id = 1531815290307
+_cookie = 'Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534318854; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534320603; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1534320641; connect.sid=s%3ApG5FevC-2hz1778eeCc7muB-M3VWkrUD.wXD%2B7t8HoUMUJMbrsc3hxl9exyrFvBiU4ZWTSm3jNs4; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1534408155'
+cookie = _cookie
 # User-Agent需要根据每个人的电脑来修改
 headers = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'Accept': '*/*',
     'Accept-Encoding': 'gzip, deflate',
 	'Accept-Language':'zh-CN,zh;q=0.9',
     'Cache-Control':'no-cache',
 	'Connection':'keep-alive',
 	# 'Content-Type':'application/x-www-form-urlencoded',
-	'Host':'www.insstar.cn',
+	'Host':'www.veryins.com',
 	'Pragma':'no-cache',
 	'Cookie': cookie,
-    'Upgrade - Insecure - Requests': '1',
-	'User-Agent':ua.random
+    # 'Upgrade - Insecure - Requests': '1',
+    # 'User-Agent':ua.random
  }
 
 # 是否有下一页
 has_next_page = True
 
+result = requests.Session()
+
 # 抓取首屏信息，获得用户的id以及下一页加载的next_cursor
-req = requests.get(_url, headers=headers)
+req = result.get(_url, headers=headers)
 print('status code: '+str(req.status_code))
 
 if req.status_code == 200:
@@ -152,7 +154,7 @@ def get_next_data(_next_cursor, _rg, _has_next_page, __uid):
 		headers['Referer'] = ins_url+'/'+user_id
 		headers['Accept'] = '*/*'
 		headers['Content-Length'] = '0'
-		headers['Host'] =  'www.insstar.cn'
+		headers['Host'] =  'www.veryins.com'
 		headers['Origin'] =ins_url
 		headers['X-Requested-With'] = 'XMLHttpRequest'
 		headers['User-Agent'] = __ua.random
@@ -197,16 +199,17 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 		headers['Referer'] = ins_url + '/' + user_id
 		headers['Accept'] = '*/*'
 		headers['Content-Length'] = '0'
-		headers['Host'] = 'insstar.cn'
+		headers['Host'] = 'www.veryins.com'
 		headers['Origin'] = ins_url
 		global start_cookie_id
 		_ua = UserAgent()
-		start_cookie_id = start_cookie_id+1
+		start_cookie_id = start_cookie_id
 		headers['Cookie'] = _cookie+str(start_cookie_id)
 		headers['X-Requested-With'] = 'XMLHttpRequest'
-		headers['User-Agent'] = _ua.random
+		# headers['User-Agent'] = _ua.random
+		headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
 		# print(headers)
-		response = requests.post(__url, headers=headers)
+		response = result.post(__url, headers=headers,allow_redirects=False)
 		if response.status_code == 200:
 			print('页面抓取正常')
 		elif response.status_code == 404:
@@ -215,6 +218,7 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
 			sys.exit()
 		else:
 			print('页面抓取异常')
+			print(response)
 			print(response.text)
 			print(response.headers)
 			sys.exit()
@@ -275,7 +279,7 @@ def get_p_info(_code,_like):
 		headers['Referer'] = ins_url + '/p/' + _code
 		headers['Accept'] = '*/*'
 		headers['Content-Length'] = '0'
-		headers['Host'] = 'www.insstar.cn'
+		headers['Host'] = 'www.veryins.com'
 		headers['Origin'] = ins_url
 		global start_cookie_id
 		start_cookie_id = start_cookie_id + 1
@@ -308,11 +312,11 @@ def get_p_info(_code,_like):
 			text = _json['caption']
 		else:
 			text = ''
-		origin_url = 'http://insstar.cn/p/' + _code
+		origin_url = 'http://www.veryins.com/p/' + _code
 		print('Instagram', display_url, take_at_timestamp, attitudes_count, is_video, video_url)
 		# print(pic_detail)
 		if _json['sidecar'] and len(_json['sidecar']) > 0:
-			for i in range(2, len(_json['sidecar'])):
+			for i in range(1, len(_json['sidecar'])):
 				pic_detail = None
 				display_url = _json['sidecar'][i]['display_url']
 				print(pic_detail, display_url)
@@ -322,25 +326,26 @@ def get_p_info(_code,_like):
 					cur1 = conn2.cursor()
 					cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,video_url,status,created_at,updated_at,origin_url) \
 	    				                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-								 (star_id, 'instagram', attitudes_count, text[0:255],
+								 (star_id, 'instagram', attitudes_count, text,
 								  _code, display_url, json.dumps(pic_detail), take_at_timestamp, is_video, video_url,
 								  status, created_at, updated_at,
 								  origin_url))
 					conn2.commit()
 				else:
 					conn2.close()
-		conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
-								 port="5432")
-		if conn1:
-			cur1 = conn1.cursor()
-			cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,video_url,status,created_at,updated_at,origin_url) \
-	    		                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-						 (star_id, 'instagram', attitudes_count, text[0:255],
-						  _code, display_url, json.dumps(pic_detail), take_at_timestamp, is_video, video_url, status,
-						  created_at, updated_at,
-						  origin_url))
-			conn1.commit()
 		else:
+			conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
+								 port="5432")
+			if conn1:
+				cur1 = conn1.cursor()
+				cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,text,code,display_url,pic_detail,take_at_timestamp,is_video,video_url,status,created_at,updated_at,origin_url) \
+				    		                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+							 (star_id, 'instagram', attitudes_count, text,
+							  _code, display_url, json.dumps(pic_detail), take_at_timestamp, is_video, video_url,
+							  status,
+							  created_at, updated_at,
+							  origin_url))
+				conn1.commit()
 			conn1.close()
 		return True
 
