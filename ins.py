@@ -59,9 +59,9 @@ else:
 
 # 拼接
 _url = ins_url+'/'+str(user_id)
-start_cookie_id = 1531815290307
-_cookie = 'Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534318854; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534320603; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1534320641; connect.sid=s%3ApG5FevC-2hz1778eeCc7muB-M3VWkrUD.wXD%2B7t8HoUMUJMbrsc3hxl9exyrFvBiU4ZWTSm3jNs4; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1534408155'
-cookie = _cookie
+start_cookie_id = 1534687565
+_cookie = 'Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534318854; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534320603; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1534408963; connect.sid=s%3AbWqD67NymmFe76t_WANBtOH_zQ9DaKpF.nS5m6hW7J%2F9kYerHo7ThDojw645kbp5vlaDaYzQC4Q4; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a='
+cookie = _cookie+ str(start_cookie_id)
 # User-Agent需要根据每个人的电脑来修改
 headers = {
     'Accept': '*/*',
@@ -364,8 +364,8 @@ for i in range(1, int(math.ceil(total / 12)-1)):
 	# print(i)
 	time.sleep(3)
 	if i % 4 == 0:
-		print('---休眠10秒--')
-		time.sleep(10)
+		print('---休眠15秒--')
+		time.sleep(15)
 	if has_next_page:
 		# 获取下一页的 ins 内容
 		get_next_data(next_cursor, rg, has_next_page, _uid)

@@ -16,7 +16,7 @@ import sys
 request_params = {"ajwvr":"6","domain":"100505","domain_op":"100505","feed_type":"0","is_all":"1","is_tag":"0","is_search":"0"}
 profile_request_params = {"profile_ftype":"1","is_all":"1"}
 
-ins_url = "http://www.insstar.cn"
+ins_url = "http://www.veryins.com"
 
 # 林允儿
 # user_id = 'yoona__lim'
@@ -62,7 +62,7 @@ _url = ins_url+'/'+str(user_id)
 #gender
 gender = input('性别(f/m):')
 
-cookie = 'OUTFOX_SEARCH_USER_ID_NCOO=1467016326.6141114; connect.sid=s%3Abd7AuHfrAsq0x0PnwvKWawv_WyGIoyJb.6OtWC%2BNE33fJXfKvQuoM4WTHDAEjb3IsN9JpZ77dJG8; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1526376660,1526396423,1526552953,1526565679; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1526565679'
+cookie = 'Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534318854; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534320603; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1534408963; connect.sid=s%3Aejgl8RaRFwqa9JBmqYphhnRuUZ6FMmMe.9La1UFcjLFRkpLJgt8paWr2juNWuGwRGcbHA1i3uOfE; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1534674051'
 
 # User-Agent需要根据每个人的电脑来修改
 headers = {
@@ -72,7 +72,7 @@ headers = {
     'Cache-Control':'no-cache',
 	'Connection':'keep-alive',
 	# 'Content-Type':'application/x-www-form-urlencoded',
-	'Host':'www.insstar.cn',
+	'Host':'www.veryins.com',
 	'Pragma':'no-cache',
 	'Cookie': cookie,
     'Upgrade - Insecure - Requests': '1',
