@@ -37,6 +37,7 @@ db_password = input('请输入数据库密码：')
 created_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 updated_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
+
 # 获取
 def get_wb_id(_star_id):
     conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
@@ -56,19 +57,19 @@ def get_wb_id(_star_id):
         return 0
 
 
-def save_image(img_src,id,pid,i):
-    print(img_src)
-    print('\n')
-    if not os.path.exists(str(user_id)):
-        os.makedirs(str(user_id))
-    _name = str(user_id) + '/' +str(id)+'_'+str(i)+'_' +str(pid) + '.jpg'
-    print(_name)
-    urllib.request.urlretrieve(img_src, _name)
+# def save_image(img_src,id,pid,i):
+#     print(img_src)
+#     print('\n')
+#     if not os.path.exists(str(user_id)):
+#         os.makedirs(str(user_id))
+#     _name = str(user_id) + '/' +str(id)+'_'+str(i)+'_' +str(pid) + '.jpg'
+#     print(_name)
+#     urllib.request.urlretrieve(img_src, _name)
+
 
 # 判断是否已入库
-def is_in(code,mid,_pid):
-    conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
-									 port="5432")
+def is_in(code,mid,_pid,attitudes_count):
+    conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1", port="5432")
     if conn1:
         cur1 = conn1.cursor()
         cur1.execute("SELECT star_id, code ,mid ,pid from star_img WHERE pid = '"+_pid+"'")
@@ -76,8 +77,10 @@ def is_in(code,mid,_pid):
         if len(rows1) > 0:
             print(rows1[0][0], rows1[0][1], rows1[0][2])
             print('--暂无更新--')
+            cur1.execute("UPDATE star_img  set attitudes_count = '" + str(attitudes_count) + "' WHERE pid = '"+str(_pid)+"' ")
             conn1.commit()
             conn1.close()
+            print('---更新点赞数--'+ str(attitudes_count))
             # sys.exit()
             return True
         else:
@@ -98,7 +101,7 @@ def insert_database(card,pic,_user_id):
     code = card['bid']
     # 判断是否已入库
     pid = pic['pid']
-    if not is_in(code,mid,pid):
+    if not is_in(code, mid, pid,attitudes_count):
         display_url = pic['large']['url']
         pic_detail = pic
         take_at_timestamp = card['created_at']
@@ -129,7 +132,6 @@ def insert_database(card,pic,_user_id):
         return False
 
 
-
 def get_cur_page_weibo(_json,i,_wb_id):
     _cards = _json['data']['cards']
     # 打印微博
@@ -145,18 +147,25 @@ def get_cur_page_weibo(_json,i,_wb_id):
                             continue
 
 
-def get_total_page(_url,_headers):
+def get_total_page(_url, _headers):
+    print(_url)
+    # 2秒休眠
+    time.sleep(2)
     _response = requests.get(_url, headers=_headers)
     # print(_response.url)
     _html = _response.text
     __json = json.loads(_html)
-    return  __json['data']['cardlistInfo']['total']  # 你要爬取的微博的页数
+    if __json['data'] and __json['data']['cardlistInfo']:
+        return __json['data']['cardlistInfo']['total']  # 你要爬取的微博的页数
+    else:
+        return False
+
 
 def update_wb(_star_id):
     # 判断数据库是否存在wb_id
     wb_id = get_wb_id(_star_id)
     # 更新全局
-    global  star_id
+    global star_id
     star_id = _star_id
     if wb_id:
         # 字段拼接
@@ -165,11 +174,11 @@ def update_wb(_star_id):
         print('---存在wb_id---继续进行')
     else:
         # global user_id
-        return False
+        return 1
 
     _url = 'https://m.weibo.cn/api/container/getIndex?containerid=' + containerid + '_-_' + weibo_type + '&luicode=10000011&lfid=' + lfid
 
-    cookie = '_T_WM=47ce00ce9baf7730b2dee7a7023362d4; SCF=AlD_D4IMYnW7WzQ9VEjiEVe50R9Fshf46k1BIJCyCzJFbuSNTxjfHAv7agK3y3i_9kRG0lCTLIb-91euITt8yQc.; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9Wh_3rJYUVcA77DsgIS-UzV_5JpX5K-hUgL.FozXS0Mp1he0eKe2dJLoIEXLxK-LBo5L12qLxK-LBo5L12qLxKqLBKzLBKqLxK-LBoMLBK-LxK-L1-eLB.2t; OUTFOX_SEARCH_USER_ID_NCOO=1522352563.9397414; SUHB=0FQ7BzCGxmtbxL; H5_INDEX_TITLE=%E5%A5%BD%E5%8F%8B%E5%9C%88%20; H5_INDEX=2; ___rl__test__cookies=1526289390542; SUB=_2AkMtpetVdcNxrABTmPgQymPlZIxH-jyecIKjAn7oJhMyPRh77g0AqSdutBF-XJf10Iac9sti1kbQHWAgNUxtA8MZ; MLOGIN=0; WEIBOCN_FROM=1110006030; M_WEIBOCN_PARAMS=luicode%3D10000011%26lfid%3D2302831900698023%26fid%3D2304131900698023_-_WEIBO_SECOND_PROFILE_WEIBO_PIC%26uicode%3D10000011'
+    cookie = '_T_WM=a8a71a74a83a25a853f7bd8045bf3f6f; WEIBOCN_FROM=1110003030; SCF=AhTMNl9bAeJagBTL5WGe7GNzjCkO383UWVTXYQT7GOZlUq8wyUOatPq8zQ5mrDn08UxgnMD190BQou-sqhRXATo.; SUB=_2A252izOsDeRhGeBI61YZ-SvNzjiIHXVSdF3krDV6PUJbktAKLVTCkW1NRqRtcEC4Hwn2o8mlcRU5hAZ48eeGgkd-; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WW1eh6.3loSElp2L4wo2_li5JpX5K-hUgL.FoqcehBR1K-pSKB2dJLoI7U0Us8EIgfr; SUHB=0bt8vmGMKHbSEk; SSOLoginState=1536115708; MLOGIN=1; M_WEIBOCN_PARAMS=luicode%3D10000011%26lfid%3D2302831900698023%26fid%3D2304131900698023_-_WEIBO_SECOND_PROFILE_WEIBO_PIC%26uicode%3D10000011'
     # User-Agent需要根据每个人的电脑来修改
     headers = {
         'Accept': 'application/json, text/plain, */*',
@@ -185,7 +194,7 @@ def update_wb(_star_id):
         'X-Requested-With': 'XMLHttpRequest'
     }
     # 总页数
-    page_total = int(get_total_page(_url,headers))
+    page_total = int(get_total_page(_url, headers))
     # 遍历每一页
     for i in range(1, page_total):
         headers['Cookie'] = cookie
@@ -202,7 +211,7 @@ def update_wb(_star_id):
             if i % 10 == 0:
                 time.sleep(5)
             time.sleep(1)
-            if not get_cur_page_weibo(_json, i,wb_id):
+            if not get_cur_page_weibo(_json, i, wb_id):
                 return False
             else:
                 return True
@@ -211,8 +220,7 @@ def update_wb(_star_id):
             return False
 
 
-conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
-									 port="5432")
+conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1", port="5432")
 if conn:
     cur = conn.cursor()
     cur.execute(
