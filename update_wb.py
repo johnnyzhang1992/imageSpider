@@ -232,7 +232,7 @@ if conn:
     conn.close()
     if len(rows) > 0:
         for n in range(len(rows)):
-            print(str(rows[n][0]),rows[n][1],rows[n][2])
+            print(str(rows[n][0]), rows[n][1],rows[n][2])
             if not update_wb(str(rows[n][0])):
                 continue
             # sys.exit()
