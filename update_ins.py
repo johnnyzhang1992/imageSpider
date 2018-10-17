@@ -63,7 +63,7 @@ current_page = 0
 # 用户第一页内容
 def get_first_page_data(star_id,_soup):
     print('---第一页数据')
-    items = _soup.find_all('div',class_='item')
+    items = _soup.find_all('div', class_='item')
     if int(len(items)) > 0:
         print('items-length:' + str(len(items)))
         for i in range(0, int(len(items))):
@@ -340,8 +340,8 @@ def update_ins(star_id, ins_name):
     soup = BeautifulSoup(req.text, 'html.parser')
 
     # uid 用户id
-    _uid = soup.find(id='username')
-    _uid = _uid.attrs['data-uid']
+    _uid = soup.find(id='username').attrs['data-uid']
+    # _uid = _uid
 
     # 加载下一页的凭证
     _list = soup.find(id='list')
@@ -387,8 +387,7 @@ def update_ins(star_id, ins_name):
         return False
 
 
-
-
+# 获取明星列表
 conn11 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1", port="5432")
 if conn11:
     cur = conn11.cursor()
@@ -400,7 +399,12 @@ if conn11:
     if len(rows) > 0:
         for n in range(len(rows)):
             print(str(rows[n][0]), rows[n][1], rows[n][2])
+            if n % 10 == 0:
+                time.sleep(20)
+            else:
+                time.sleep(1)
             if rows[n][1]:
+                # 确保该明星有 ins 账号
                 if not update_ins(str(rows[n][0]), rows[n][1]):
                     continue
             else:
