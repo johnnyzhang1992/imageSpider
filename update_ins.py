@@ -124,6 +124,7 @@ def get_next_data(user_id,_next_cursor, _rg, _has_next_page, __uid):
         if len(_json['user']['media']['nodes']) > 0:
             for i in range(0, int(len(_json['user']['media']['nodes']))):
                 # code
+                time.sleep(3)
                 print(_json['user']['media']['nodes'][i]['code'])
                 # 获取当前页面的所有单条内容的详细信息
                 if not get_p_info(user_id, _json['user']['media']['nodes'][i]['code'],
@@ -203,7 +204,7 @@ def is_in(star_id, code):
                             port="5432")
     if conn_1:
         cur_1 = conn_1.cursor()
-        cur_1.execute("SELECT star_id, code from star_img WHERE status = 'active' AND code = '" + code + "' AND star_id = '"+ star_id+"'")
+        cur_1.execute("SELECT star_id, code from star_img WHERE code = '" + code + "' AND star_id = '"+ star_id+"'")
         # cur_1.execute("SELECT star_id, code from star_img WHERE code = '" + code + "' AND star_id = '" + star_id + "'")
 
         rows_1 = cur_1.fetchall()
@@ -240,7 +241,7 @@ def get_p_info(star_id, _code, _like):
         headers['X-Requested-With'] = 'XMLHttpRequest'
         headers['User-Agent'] = _ua.random
         __url = ins_url + '/p/' + _code
-        time.sleep(1)
+
         response = requests.post(__url, headers=headers)
         if response.status_code == 200:
             print('页面抓取正常')
