@@ -17,7 +17,7 @@ ua = UserAgent()
 request_params = {"ajwvr":"6","domain":"100505","domain_op":"100505","feed_type":"0","is_all":"1","is_tag":"0","is_search":"0"}
 profile_request_params = {"profile_ftype":"1","is_all":"1"}
 
-ins_url = "http://www.veryins.com"
+ins_url = "https://www.veryins.com"
 
 # 林允儿
 # user_id = 'yoona__lim'
