@@ -267,7 +267,7 @@ def get_p_info(star_id, _code, _like):
                 text = _json['caption']
             else:
                 text = ''
-            origin_url = 'http://www.veryins.com/p/' + _code
+            origin_url = 'https://www.veryins.com/p/' + _code
             print('Instagram', display_url, take_at_timestamp, attitudes_count, is_video, video_url)
             # print(pic_detail)
             if _json['sidecar'] and len(_json['sidecar']) > 0:
