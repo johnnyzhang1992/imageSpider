@@ -28,8 +28,9 @@ ins_url = "https://www.veryins.com"
 db_name = 'starimg'
 db_user = 'postgres'
 db_password = input('请输入数据库密码：')
-start_cookie_id = 1534687565
-_cookie = 'Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534318854; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534320603; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1534408963; connect.sid=s%3AbWqD67NymmFe76t_WANBtOH_zQ9DaKpF.nS5m6hW7J%2F9kYerHo7ThDojw645kbp5vlaDaYzQC4Q4; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a='
+start_cookie_id = 1542248536
+_cookie = '__cfduid=d765bdd1608f3e9bc972e1a189fdf1b381540347408; Hm_lvt_453ab3ca06e82d916be6d6937c3bf101=1541830024,1541913635,1541993001,1542076535;' \
+          ' hd_hongbao=1; connect.sid=s%3ApKU24klzWGhtv4j_S4whEiJTrEgXoApT.AmtWS5WMsvK4aNZ2K9ghqAO68dEnpEHvFAhOSM7SsII; Hm_lpvt_453ab3ca06e82d916be6d6937c3bf101='
 cookie = _cookie + str(start_cookie_id)
 # User-Agent需要根据每个人的电脑来修改
 headers = {

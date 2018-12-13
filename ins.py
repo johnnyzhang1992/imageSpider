@@ -60,9 +60,12 @@ else:
 
 # 拼接
 _url = ins_url+'/'+str(user_id)
-start_cookie_id = 1534687565
-_cookie = 'Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534318854; Hm_lvt_f9dcf4433e76d7f5b041b0634f78a43a=1534320603; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a=1534408963; connect.sid=s%3AbWqD67NymmFe76t_WANBtOH_zQ9DaKpF.nS5m6hW7J%2F9kYerHo7ThDojw645kbp5vlaDaYzQC4Q4; Hm_lpvt_f9dcf4433e76d7f5b041b0634f78a43a='
-cookie = _cookie+ str(start_cookie_id)
+start_cookie_id = 1544684329
+_cookie = '__cfduid=d765bdd1608f3e9bc972e1a189fdf1b381540347408; ___rl__test__cookies=1542681514842; OUTFOX_SEARCH_USER_ID_NCOO=1029395707.9778699;' \
+          ' Hm_lvt_453ab3ca06e82d916be6d6937c3bf101=1543893599,1544433571,1544665231,1544665483; ' \
+          'hd_hongbao=1; connect.sid=s%3As9xLGPi5xWnimSLCI4R9Nqae7i4qdCvO.nHwB9Ledau5cPSUEP%2Bl1ba1ky6ZMXo%2BQ6u1cQi%2BPn1c;' \
+          ' Hm_lpvt_453ab3ca06e82d916be6d6937c3bf101='
+cookie = _cookie + str(start_cookie_id)
 # User-Agent需要根据每个人的电脑来修改
 headers = {
     'Accept': '*/*',
@@ -86,7 +89,7 @@ result = requests.Session()
 # 抓取首屏信息，获得用户的id以及下一页加载的next_cursor
 req = result.get(_url, headers=headers)
 print('status code: '+str(req.status_code))
-
+# print(req.text)
 if req.status_code == 200:
     print('页面抓取正常')
 elif req.status_code == 404:
