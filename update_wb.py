@@ -178,7 +178,7 @@ def update_wb(_star_id):
 
     _url = 'https://m.weibo.cn/api/container/getIndex?containerid=' + containerid + '_-_' + weibo_type + '&luicode=10000011&lfid=' + lfid
 
-    cookie = '_T_WM=a8a71a74a83a25a853f7bd8045bf3f6f; WEIBOCN_FROM=1110003030; SCF=AhTMNl9bAeJagBTL5WGe7GNzjCkO383UWVTXYQT7GOZlUq8wyUOatPq8zQ5mrDn08UxgnMD190BQou-sqhRXATo.; SUB=_2A252izOsDeRhGeBI61YZ-SvNzjiIHXVSdF3krDV6PUJbktAKLVTCkW1NRqRtcEC4Hwn2o8mlcRU5hAZ48eeGgkd-; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WW1eh6.3loSElp2L4wo2_li5JpX5K-hUgL.FoqcehBR1K-pSKB2dJLoI7U0Us8EIgfr; SUHB=0bt8vmGMKHbSEk; SSOLoginState=1536115708; MLOGIN=1; M_WEIBOCN_PARAMS=luicode%3D10000011%26lfid%3D2302831900698023%26fid%3D2304131900698023_-_WEIBO_SECOND_PROFILE_WEIBO_PIC%26uicode%3D10000011'
+    cookie = 'WEIBOCN_FROM=1110003030; OUTFOX_SEARCH_USER_ID_NCOO=123636308.59677954; SCF=AhTMNl9bAeJagBTL5WGe7GNzjCkO383UWVTXYQT7GOZl_moFcko7o_e4THpdktKfDvh_so5KnHRtQmyCQgv0IyQ.; SUHB=0QS5d_Aa7-wF5m; _T_WM=08780ade7cbb594bc7f80e940f617a83; SSOLoginState=1548123454; ALF=1550715454; MLOGIN=0; M_WEIBOCN_PARAMS=luicode%3D10000011%26lfid%3D2302831246229612%26fid%3D2304131246229612_-_WEIBO_SECOND_PROFILE_WEIBO_PIC%26uicode%3D10000011'
     # User-Agent需要根据每个人的电脑来修改
     headers = {
         'Accept': 'application/json, text/plain, */*',
@@ -198,6 +198,7 @@ def update_wb(_star_id):
     # 遍历每一页
     for i in range(1, page_total):
         headers['Cookie'] = cookie
+        headers['User-Agent'] = ua.random
         __url = _url
         if i > 1:
             __url = _url + '&page_type=03&page=' + str(i)
@@ -224,7 +225,7 @@ conn = psycopg2.connect(database=db_name, user=db_user, password=db_password, ho
 if conn:
     cur = conn.cursor()
     cur.execute(
-        "SELECT id, wb_id,name from star ORDER BY id ASC ")
+        "SELECT id, wb_id,name from star WHERE status = 'active' ORDER BY id ASC ")
     rows = cur.fetchall()
     # print(rows)
     # print(len(rows))
@@ -232,7 +233,13 @@ if conn:
     conn.close()
     if len(rows) > 0:
         for n in range(len(rows)):
-            print(str(rows[n][0]), rows[n][1],rows[n][2])
+            # 爬10个用户休眠5秒
+            if n > 10 and n % 10 == 0:
+                time.sleep(10)
+                print('休眠10秒')
+            time.sleep(3)
+            print('休眠3秒')
+            print(str(rows[n][0]), rows[n][1], rows[n][2])
             if not update_wb(str(rows[n][0])):
                 continue
             # sys.exit()
