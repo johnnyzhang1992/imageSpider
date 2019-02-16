@@ -109,10 +109,16 @@ def insert_database(card,pic,_user_id):
         status = 'active'
         origin_url = 'https://weibo.com/' + _user_id + '/' + code
         print(star_id, '微博', attitudes_count, comments_count, reposts_count, is_long_text, text, mid, code, display_url)
+
         print(pic_detail)
         print(take_at_timestamp, status)
-        conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
-                                 port="5432")
+        conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1", port="5432")
+        if str(attitudes_count).find('万+') >= 0:
+            attitudes_count = int(attitudes_count.replace("万+", "0000"))
+        if str(comments_count).find('万+') >= 0:
+            comments_count = int(comments_count.replace("万+", "0000"))
+        if str(reposts_count).find('万+') >= 0:
+            reposts_count = int(reposts_count.replace("万+", "0000"))
         if conn1:
             cur1 = conn1.cursor()
             cur1.execute("INSERT INTO star_img (star_id,origin,attitudes_count,comments_count,reposts_count,\
@@ -132,7 +138,7 @@ def insert_database(card,pic,_user_id):
         return False
 
 
-def get_cur_page_weibo(_json,i,_wb_id):
+def get_cur_page_weibo(_json, i, _wb_id):
     _cards = _json['data']['cards']
     # 打印微博
     for card in _cards:

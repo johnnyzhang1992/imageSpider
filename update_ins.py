@@ -106,6 +106,8 @@ def get_next_data(user_id,_next_cursor, _rg, _has_next_page, __uid):
             print('页面抓取正常')
         elif response.status_code == 404:
             print('当前页面不存在')
+            # 再次请求
+            # response = requests.post(__url, headers=headers)
             # 退出程序
             sys.exit()
         else:
@@ -260,6 +262,8 @@ def get_p_info(star_id, _code, _like):
             display_url = _json['display_url']
             take_at_timestamp = _json['taken_at_timestamp']
             attitudes_count = _like
+            if str(attitudes_count).find('万+') >= 0:
+                attitudes_count = int(attitudes_count.replace("万+", "0000"))
             pic_detail = _json['display_resources']
             is_video = _json['is_video']
             video_url = _json['video_url']
