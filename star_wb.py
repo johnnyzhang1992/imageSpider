@@ -69,7 +69,7 @@ weibo_type = 'WEIBO_SECOND_PROFILE_WEIBO_PIC'
 containerid = '230413'+user_id
 lfid = '230283'+user_id
 
-_url = 'https://m.weibo.cn/api/container/getIndex?containerid='+ containerid+'_-_'+weibo_type+'&luicode=10000011&lfid='+lfid+'&type=uid&value='+user_id
+_url = 'https://m.weibo.cn/api/container/getIndex?containerid=' + containerid+'_-_'+weibo_type+'&luicode=10000011&lfid='+lfid+'&type=uid&value='+user_id
 
 cookie = 'OUTFOX_SEARCH_USER_ID_NCOO=200622491.85643607; _T_WM=5fe554ab8cacafd1178a525cdecf9e27; ALF=1532570144; WEIBOCN_FROM=1110006030; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9Wh_3rJYUVcA77DsgIS-UzV_5JpX5K-hUgL.FozXS0Mp1he0eKe2dJLoIEXLxK-LBo5L12qLxK-LBo5L12qLxKqLBKzLBKqLxK-LBoMLBK-LxK-L1-eLB.2t; MLOGIN=1; SCF=AlD_D4IMYnW7WzQ9VEjiEVe50R9Fshf46k1BIJCyCzJFNXp5Ai-xhaJMvwpW7jxV361LEmg8knsQ7H0vcFYg1nI.; SUB=_2A252Nbk8DeRhGeRK7FUQ-C3Pyj-IHXVV2cd0rDV6PUJbktAKLWv_kW1NUyw6NHG_SIkq3ybyx2AupZO4pWVE13rr; SUHB=0BLpnRWl2XCpLH; SSOLoginState=1529989484; M_WEIBOCN_PARAMS=oid%3D2304131350995007_-_WEIBO_SECOND_PROFILE_MORE_WEIBO%26fid%3D2302831350995007%26luicode%3D10000011%26lfid%3D2302831350995007%26uicode%3D10000011'
 # User-Agent需要根据每个人的电脑来修改
