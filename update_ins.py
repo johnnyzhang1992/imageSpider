@@ -109,11 +109,11 @@ def get_next_data(user_id,_next_cursor, _rg, _has_next_page, __uid):
             # 再次请求
             # response = requests.post(__url, headers=headers)
             # 退出程序
-            sys.exit()
+            # sys.exit()
         else:
             print('页面抓取异常')
             print(response.headers)
-            sys.exit()
+            # sys.exit()
         # 获得的 json 格式的 ins 内容，先解析
         _json = json.loads(response.text)
         # print(_json)
@@ -165,13 +165,13 @@ def get_second_page_data(user_id, _next_cursor, _rg, _has_next_page, __uid):
         elif response.status_code == 404:
             print('当前页面不存在')
             # 退出程序
-            sys.exit()
+            # sys.exit()
         else:
             print('页面抓取异常')
             print(response)
             print(response.text)
             print(response.headers)
-            sys.exit()
+            # sys.exit()
         # 获得的 json 格式的 ins 内容，先解析
         _json = json.loads(response.text)
         # 更新全局的下一页凭证以及是否存在下一页
@@ -337,7 +337,7 @@ def update_ins(star_id, ins_name):
     elif req.status_code == 404:
         print('当前用户不存在')
         # 退出程序
-        sys.exit()
+        # sys.exit()
     else:
         print('页面抓取异常')
         print(req.text)
@@ -398,7 +398,7 @@ conn11 = psycopg2.connect(database=db_name, user=db_user, password=db_password, 
 if conn11:
     cur = conn11.cursor()
     cur.execute(
-        "SELECT id, ins_name,name from star ORDER BY id ASC ")
+        "SELECT id, ins_name, name from star where status = 'active' ORDER BY id ASC ")
     rows = cur.fetchall()
     conn11.commit()
     conn11.close()
