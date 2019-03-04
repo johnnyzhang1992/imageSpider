@@ -149,6 +149,12 @@ def insert_database(card, pic):
         print(star_id, '微博', attitudes_count, comments_count, reposts_count, is_long_text, text, mid, code, display_url)
         print(pic_detail)
         print(take_at_timestamp, status)
+        if str(attitudes_count).find('万+') >= 0:
+            attitudes_count = int(attitudes_count.replace("万+", "0000"))
+        if str(comments_count).find('万+') >= 0:
+            comments_count = int(comments_count.replace("万+", "0000"))
+        if str(reposts_count).find('万+') >= 0:
+            reposts_count = int(reposts_count.replace("万+", "0000"))
         conn1 = psycopg2.connect(database=db_name, user=db_user, password=db_password, host="127.0.0.1",
                                  port="5432")
         if conn1:

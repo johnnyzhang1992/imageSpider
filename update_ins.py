@@ -398,7 +398,7 @@ conn11 = psycopg2.connect(database=db_name, user=db_user, password=db_password, 
 if conn11:
     cur = conn11.cursor()
     cur.execute(
-        "SELECT id, ins_name, name from star where status = 'active' ORDER BY id ASC ")
+        "SELECT star_id, name, id from star_ins where status = 'active' ORDER BY id ASC ")
     rows = cur.fetchall()
     conn11.commit()
     conn11.close()
