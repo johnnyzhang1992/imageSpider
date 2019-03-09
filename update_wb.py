@@ -33,6 +33,7 @@ db_name = 'starimg'
 db_user = 'postgres'
 db_password = input('请输入数据库密码：')
 
+start_id = input('起始 id:')
 # 时间
 created_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 updated_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -237,8 +238,13 @@ if conn:
     # print(len(rows))
     conn.commit()
     conn.close()
+    total = len(rows)
     if len(rows) > 0:
         for n in range(len(rows)):
+            if int(start_id) > 1 and n + 1 < int(start_id):
+                print(str(rows[n][0]), rows[n][1], rows[n][2])
+                print('跳过------')
+                continue
             # 爬10个用户休眠5秒
             if n > 10 and n % 10 == 0:
                 time.sleep(10)

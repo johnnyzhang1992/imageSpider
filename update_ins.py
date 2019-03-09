@@ -28,6 +28,7 @@ ins_url = "https://www.veryins.com"
 db_name = 'starimg'
 db_user = 'postgres'
 db_password = input('请输入数据库密码：')
+start_id = input('起始 id:')
 start_cookie_id = 1542248536
 _cookie = '__cfduid=d765bdd1608f3e9bc972e1a189fdf1b381540347408; Hm_lvt_453ab3ca06e82d916be6d6937c3bf101=1541830024,1541913635,1541993001,1542076535;' \
           ' hd_hongbao=1; connect.sid=s%3ApKU24klzWGhtv4j_S4whEiJTrEgXoApT.AmtWS5WMsvK4aNZ2K9ghqAO68dEnpEHvFAhOSM7SsII; Hm_lpvt_453ab3ca06e82d916be6d6937c3bf101='
@@ -405,6 +406,9 @@ if conn11:
     if len(rows) > 0:
         for n in range(len(rows)):
             print(str(rows[n][0]), rows[n][1], rows[n][2])
+            if int(start_id) > 1 and n + 1 < int(start_id):
+                print('跳过------')
+                continue
             if n % 10 == 0:
                 time.sleep(20)
             else:
