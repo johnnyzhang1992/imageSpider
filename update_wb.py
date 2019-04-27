@@ -217,8 +217,8 @@ def update_wb(_star_id):
         if 'cards' in _json['data'] and len(_json['data']['cards']) > 0:
             # 爬十页休眠5秒
             if i % 10 == 0:
-                time.sleep(5)
-            time.sleep(1)
+                time.sleep(10)
+            time.sleep(3)
             if not get_cur_page_weibo(_json, i, wb_id):
                 return False
             else:
@@ -249,8 +249,8 @@ if conn:
             if n > 10 and n % 10 == 0:
                 time.sleep(10)
                 print('休眠10秒')
-            time.sleep(3)
-            print('休眠3秒')
+            time.sleep(5)
+            print('休眠5秒')
             print(str(rows[n][0]), rows[n][1], rows[n][2])
             if not update_wb(str(rows[n][0])):
                 continue
