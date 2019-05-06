@@ -114,6 +114,7 @@ def get_next_data(user_id,_next_cursor, _rg, _has_next_page, __uid):
         else:
             print('页面抓取异常')
             print(response.headers)
+            # print(response.headers)
             # sys.exit()
         # 获得的 json 格式的 ins 内容，先解析
         _json = json.loads(response.text)
@@ -169,8 +170,8 @@ def get_second_page_data(user_id, _next_cursor, _rg, _has_next_page, __uid):
             # sys.exit()
         else:
             print('页面抓取异常')
-            print(response)
-            print(response.text)
+            # print(response)
+            # print(response.text)
             print(response.headers)
             # sys.exit()
         # 获得的 json 格式的 ins 内容，先解析
