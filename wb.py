@@ -78,7 +78,7 @@ def get_cur_page_weibo(_json,i):
             # if 'weibo_position' in card['mblog'].keys() and card['mblog']['weibo_position'] == 1:
                 if 'pics' in card['mblog'].keys() and card['mblog']['pics']:
                     print(card['mblog']['pic_num'])
-                    for x in range(card['mblog']['pic_num']):
+                    for x in range(len(card['mblog']['pics'])):
                         if x % 5 == 0:
                             time.sleep(1)
                         print(card['mblog']['pics'][x])
