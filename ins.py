@@ -151,7 +151,7 @@ def get_first_page_data(_soup):
 # 获取下一页内容
 def get_next_data(_next_cursor, _rg, _has_next_page, __uid):
     print(_next_cursor,_rg,_has_next_page,__uid)
-    if _next_cursor != '' and _rg != '' and _has_next_page:
+    if _next_cursor != '' and _has_next_page:
         __url = ins_url + '/user/' + user_id + '?next=' + _next_cursor + '&uid=' + __uid + '&rg=' + _rg
         print(__url)
         # 更新请求头
@@ -197,8 +197,9 @@ def get_next_data(_next_cursor, _rg, _has_next_page, __uid):
 
 # 获取第二页的内容
 def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
+    print('second page')
     print(_next_cursor, _rg, _has_next_page, __uid)
-    if _next_cursor != '' and _rg != '' and _has_next_page:
+    if _next_cursor != '' and _has_next_page:
         __url = ins_url + '/user/' + user_id + '?next=' + _next_cursor + '&uid=' + __uid + '&rg=' + _rg
         print(__url)
         # 更新请求头
@@ -212,9 +213,9 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
         start_cookie_id = start_cookie_id
         headers['Cookie'] = _cookie + str(start_cookie_id)
         headers['X-Requested-With'] = 'XMLHttpRequest'
-        # headers['User-Agent'] = _ua.random
-        headers[
-            'User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
+        headers['User-Agent'] = _ua.random
+        # headers[
+            # 'User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
         # print(headers)
         response = result.post(__url, headers=headers, allow_redirects=False)
         if response.status_code == 200:
@@ -247,10 +248,9 @@ def get_second_page_data(_next_cursor, _rg, _has_next_page, __uid):
                 # code
                 print(_json['user']['media']['nodes'][i]['code'])
                 # 获取当前页面的所有单条内容的详细信息
-                if not is_in(_json['user']['media']['nodes'][i]['code']):
-                    return False
-                else:
-                    get_p_info(_json['user']['media']['nodes'][i]['code'], _json['user']['media']['nodes'][i]['likes'])
+                if not get_p_info(_json['user']['media']['nodes'][i]['code'],
+                                  _json['user']['media']['nodes'][i]['likes']):
+                    continue
 
 
 # 判断是否已入库
