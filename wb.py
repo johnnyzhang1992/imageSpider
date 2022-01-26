@@ -28,6 +28,8 @@ weibo_url = "https://m.weibo.cn/"
 # user_id = '1900698023'
 # star_id = 1
 star_id = input('请输入star_id:')
+# 输入上次结束时的 since_id ,可以从上次中断时开始下载
+input_since_id = input("请输入 since_id:")
 
 weibo_type = 'WEIBO_SECOND_PROFILE_WEIBO_PIC'
 
@@ -61,11 +63,21 @@ headers = {
 def save_image(img_src, id, pid,x):
     print(img_src)
     print('\n')
-    if not os.path.exists(str('web/'+star_id)):
-        os.makedirs(str('web/'+star_id))
-    _name = 'web/'+str(star_id) + '/' +str(id)+'_' +str(x)+'_'+str(pid) + '.jpg'
+    path = str('web/'+star_id+'/img')
+    if not os.path.exists(path):
+        os.makedirs(path)
+    _name = path+'/' +str(id)+'_' +str(x)+'_'+str(pid) + '.jpg'
     print(_name)
     urllib.request.urlretrieve(img_src, _name)
+
+def save_record(id):
+    if not os.path.exists(str('web/'+star_id)):
+        os.makedirs(str('web/'+star_id))
+    file = open(str('web/'+star_id+'/record.text'),mode='a')
+    if id != '':
+        file.write('since_id:'+str(id))
+        file.write('\n')
+    file.close()
 
 def get_cur_page_weibo(_json,i):
     _cards = _json['data']['cards']
@@ -96,12 +108,12 @@ def get_total_page(_url):
 print(_url)
 # 总页数
 page_total = int(get_total_page(_url))
-since_id = ""
+since_id = input_since_id or ""
 # 遍历每一页
 for i in range(1, page_total):
     headers['Cookie'] = cookie
     __url = _url
-    if i > 1:
+    if i > 1 or since_id != '':
         __url = _url+'&since_id='+ str(since_id)
         # print(_url)
     response = requests.get(__url, headers=headers)
@@ -109,10 +121,12 @@ for i in range(1, page_total):
     html = response.text
     _json = json.loads(html)
     # print(_json['data'])
-    if _json["data"] and _json["data"]["cardlistInfo"] and _json["data"]["cardlistInfo"]["since_id"]:
+    if  _json["data"] and _json["data"]["cardlistInfo"] and 'since_id' in _json["data"]["cardlistInfo"]:
         since_id = _json["data"]["cardlistInfo"]["since_id"] or ""
+        save_record(since_id)     
     else:
         since_id = ""
+        
     if 'cards' in _json['data'] and len(_json['data']['cards']) > 0:
         print(len(_json['data']['cards']))
         # 爬十页休眠5秒
