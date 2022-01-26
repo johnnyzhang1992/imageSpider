@@ -8,6 +8,13 @@
 
 - `douban.py` 豆瓣电影明星图片爬虫 『不确定是否可用』
 
+### `wb.py` 使用说明
+
+- star_id: 在微博上获取要爬取的明星 id
+- since_id: 上一次爬取的位置，可在对应文件目录的 record.text 文件内取值
+
+正确运行后，会在 根目录下创建 `web\[start_id]`对应的文件夹，文件夹内`img`保存图片信息，`reord.text`记录上次 请求的 `since_id` 相关数据
+
 ## 技术说明
 
 > python 版本： 3.7

@@ -29,6 +29,7 @@ weibo_url = "https://m.weibo.cn/"
 # star_id = 1
 star_id = input('请输入star_id:')
 # 输入上次结束时的 since_id ,可以从上次中断时开始下载
+# 从对应目录下 record.text 文件内取值
 input_since_id = input("请输入 since_id:")
 
 weibo_type = 'WEIBO_SECOND_PROFILE_WEIBO_PIC'
@@ -39,9 +40,7 @@ containerid = '107603'+star_id
 # https://m.weibo.cn/api/container/getIndex?jumpfrom=weibocom&type=uid&value=1350995007&containerid=1076031350995007&since_id=4720786105434427
 baseUrl = 'https://m.weibo.cn/api/container/getIndex?jumpfrom=weibocom&type=uid'
 _url =  baseUrl + '&value='+star_id+'&containerid='+containerid
-# since_id
 
-#cookie = 'ALF=1538643564; _T_WM=a8a71a74a83a25a853f7bd8045bf3f6f; WEIBOCN_FROM=1110003030; SCF=AhTMNl9bAeJagBTL5WGe7GNzjCkO383UWVTXYQT7GOZlUq8wyUOatPq8zQ5mrDn08UxgnMD190BQou-sqhRXATo.; SUB=_2A252izOsDeRhGeBI61YZ-SvNzjiIHXVSdF3krDV6PUJbktAKLVTCkW1NRqRtcEC4Hwn2o8mlcRU5hAZ48eeGgkd-; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WW1eh6.3loSElp2L4wo2_li5JpX5K-hUgL.FoqcehBR1K-pSKB2dJLoI7U0Us8EIgfr; SUHB=0bt8vmGMKHbSEk; SSOLoginState=1536115708; MLOGIN=1; M_WEIBOCN_PARAMS=luicode%3D10000011%26lfid%3D2302831900698023%26fid%3D2304131900698023_-_WEIBO_SECOND_PROFILE_WEIBO_PIC%26uicode%3D10000011'
 cookie = 'WEIBOCN_FROM=1110003030; OUTFOX_SEARCH_USER_ID_NCOO=123636308.59677954; SCF=AhTMNl9bAeJagBTL5WGe7GNzjCkO383UWVTXYQT7GOZl_moFcko7o_e4THpdktKfDvh_so5KnHRtQmyCQgv0IyQ.; SUHB=0QS5d_Aa7-wF5m; _T_WM=08780ade7cbb594bc7f80e940f617a83; SSOLoginState=1548123454; ALF=1550715454; MLOGIN=0; M_WEIBOCN_PARAMS=luicode%3D10000011%26lfid%3D2302831246229612%26fid%3D2304131246229612_-_WEIBO_SECOND_PROFILE_WEIBO_PIC%26uicode%3D10000011'
 
 # User-Agent需要根据每个人的电脑来修改
@@ -60,6 +59,7 @@ headers = {
     "x-xsrf-token": 'b69e1d'
  }
 
+# 保存图片到本地
 def save_image(img_src, id, pid,x):
     print(img_src)
     print('\n')
@@ -70,6 +70,7 @@ def save_image(img_src, id, pid,x):
     print(_name)
     urllib.request.urlretrieve(img_src, _name)
 
+# 保存 since_id 到 record.text 文件内
 def save_record(id):
     if not os.path.exists(str('web/'+star_id)):
         os.makedirs(str('web/'+star_id))
@@ -79,6 +80,7 @@ def save_record(id):
         file.write('\n')
     file.close()
 
+# 获取当前页的微博图片数据
 def get_cur_page_weibo(_json,i):
     _cards = _json['data']['cards']
     # _cardListInfo = _json['data']['cardlistInfo']
@@ -87,17 +89,15 @@ def get_cur_page_weibo(_json,i):
         # 微博
         if card['card_type'] == 9:
             # 只爬取原创微博的配图
-            # if 'weibo_position' in card['mblog'].keys() and card['mblog']['weibo_position'] == 1:
-                if 'pics' in card['mblog'].keys() and card['mblog']['pics']:
-                    print(card['mblog']['pic_num'])
-                    for x in range(len(card['mblog']['pics'])):
-                        if x % 5 == 0:
-                            time.sleep(1)
-                        print(card['mblog']['pics'][x])
-                        save_image(card['mblog']['pics'][x]['large']['url'],card['mblog']['id'],card['mblog']['mid'],x)
-                        # print(card['mblog'])
-
-
+            if 'pics' in card['mblog'].keys() and card['mblog']['pics']:
+                print(card['mblog']['pic_num'])
+                for x in range(len(card['mblog']['pics'])):
+                    # 每下载五张图片，休眠 1S
+                    if x % 5 == 0:
+                        time.sleep(1)
+                    print(card['mblog']['pics'][x])
+                    save_image(card['mblog']['pics'][x]['large']['url'],card['mblog']['id'],card['mblog']['mid'],x)
+# 获取总的图片数量
 def get_total_page(_url):
     _response = requests.get(_url, headers=headers)
     print(_response.url)
@@ -105,10 +105,11 @@ def get_total_page(_url):
     __json = json.loads(_html)
     return __json['data']['cardlistInfo']['total']  # 你要爬取的微博的页数
 
-print(_url)
 # 总页数
 page_total = int(get_total_page(_url))
+# since_id
 since_id = input_since_id or ""
+
 # 遍历每一页
 for i in range(1, page_total):
     headers['Cookie'] = cookie
