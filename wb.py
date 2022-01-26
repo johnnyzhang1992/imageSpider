@@ -1,6 +1,6 @@
 # !/usr/bin/python
 # encoding:utf-8
-# 这个例子是去获取微博里的图片，例子爬取的微博是萌妹子吴倩：吴倩mine4ever
+# 这个例子是去获取微博里的图片，例子爬取的微博是欧阳娜娜：2687827715
 
 import time
 import requests
@@ -25,22 +25,21 @@ weibo_url = "https://m.weibo.cn/"
 # WEIBO_SECOND_PROFILE_WEIBO_ARTICAL 文章
 # WEIBO_SECOND_PROFILE_WEIBO_WEIBO_SECOND_PROFILE_WEIBO_PIC 文章
 
-# user_id = '1900698023'
-# star_id = 1
+# 下面 ID 为欧阳娜娜的微博 ID
+# star_id = 2687827715
 star_id = input('请输入star_id:')
 # 输入上次结束时的 since_id ,可以从上次中断时开始下载
 # 从对应目录下 record.text 文件内取值
 input_since_id = input("请输入 since_id:")
 
-weibo_type = 'WEIBO_SECOND_PROFILE_WEIBO_PIC'
-
 # 字段拼接
 containerid = '107603'+star_id
 
-# https://m.weibo.cn/api/container/getIndex?jumpfrom=weibocom&type=uid&value=1350995007&containerid=1076031350995007&since_id=4720786105434427
+# https://m.weibo.cn/api/container/getIndex?jumpfrom=weibocom&type=uid&value=2687827715&containerid=1076032687827715&since_id=4720786105434427
 baseUrl = 'https://m.weibo.cn/api/container/getIndex?jumpfrom=weibocom&type=uid'
 _url =  baseUrl + '&value='+star_id+'&containerid='+containerid
 
+# 最好使用真实的
 cookie = 'WEIBOCN_FROM=1110003030; OUTFOX_SEARCH_USER_ID_NCOO=123636308.59677954; SCF=AhTMNl9bAeJagBTL5WGe7GNzjCkO383UWVTXYQT7GOZl_moFcko7o_e4THpdktKfDvh_so5KnHRtQmyCQgv0IyQ.; SUHB=0QS5d_Aa7-wF5m; _T_WM=08780ade7cbb594bc7f80e940f617a83; SSOLoginState=1548123454; ALF=1550715454; MLOGIN=0; M_WEIBOCN_PARAMS=luicode%3D10000011%26lfid%3D2302831246229612%26fid%3D2304131246229612_-_WEIBO_SECOND_PROFILE_WEIBO_PIC%26uicode%3D10000011'
 
 # User-Agent需要根据每个人的电脑来修改
@@ -97,6 +96,7 @@ def get_cur_page_weibo(_json,i):
                         time.sleep(1)
                     print(card['mblog']['pics'][x])
                     save_image(card['mblog']['pics'][x]['large']['url'],card['mblog']['id'],card['mblog']['mid'],x)
+
 # 获取总的图片数量
 def get_total_page(_url):
     _response = requests.get(_url, headers=headers)
@@ -140,5 +140,3 @@ for i in range(1, page_total):
     else:
         print('爬取完毕')
         break
-
-
